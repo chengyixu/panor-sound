@@ -1,0 +1,17 @@
+# Render with:
+# SITE_BASE_PATH=/sound SITE_WEB_PARENT=/absolute/web/root \
+#   node deploy/render-nginx-config.mjs > sound.nginx.conf
+#
+# Include the rendered file inside the relevant HTTPS server block. The directory
+# {{SITE_WEB_PARENT}}{{SITE_BASE_PATH}} must contain index.html and assets/.
+
+location = {{SITE_BASE_PATH}} {
+    return 308 {{SITE_BASE_PATH}}/;
+}
+
+location ^~ {{SITE_BASE_PATH}}/ {
+    root {{SITE_WEB_PARENT}};
+    try_files $uri $uri/ {{SITE_BASE_PATH}}/index.html;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}
