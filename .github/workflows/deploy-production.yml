@@ -64,7 +64,7 @@ jobs:
       - name: Capture /soundscape/ isolation fingerprint
         run: curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape.sha"
       - name: Package release
-        run: tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
+        run: COPYFILE_DISABLE=1 tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
       - name: Upload and deploy atomically
         id: deploy
         env:

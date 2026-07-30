@@ -70,7 +70,7 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 fi
 node scripts/verify-site.mjs --production
 
-tar -czf - index.html site.config.js assets | ssh "$SOUND_DEPLOY_TARGET" "
+COPYFILE_DISABLE=1 tar -czf - index.html site.config.js assets | ssh "$SOUND_DEPLOY_TARGET" "
   set -eu
   destination='$site_directory'
   staging=\"\${destination}.staging-\$(date +%s)\"

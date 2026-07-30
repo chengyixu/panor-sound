@@ -90,7 +90,7 @@ SOUND_SITE_URL=https://www.panor.tech/sound/ \
   ./deploy/publish-static.sh --apply
 ```
 
-The manual publisher uploads only `index.html`, `site.config.js`, and `assets/`. Normal releases use the CI/CD release helper because it also updates Panor registration files and preserves rollback state.
+The manual publisher uploads only `index.html`, `site.config.js`, and `assets/`, with macOS metadata disabled so the server receives the same clean file set as GitHub Actions. Normal releases use the CI/CD release helper because it also updates Panor registration files and preserves rollback state.
 
 ## Post-Release Checks
 
