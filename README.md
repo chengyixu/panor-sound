@@ -11,13 +11,13 @@ It is intentionally not a copy of the existing `/soundscape/` product. This repo
 - Root instructions for both Codex and Claude Code: `AGENTS.md` and `CLAUDE.md`.
 - Project-specific skills for development, verification, and safe deployment.
 - A generic Nginx configuration template and an opt-in static deployment script.
-- GitHub Actions verification with no deployment credentials.
+- Gated GitHub CI/CD with environment-scoped, least-privilege deployment credentials.
 
 ## Start Here
 
 ```bash
-git clone <repository-url>
-cd sound
+git clone https://github.com/chengyixu/panor-sound.git
+cd panor-sound
 
 # Read the project contract before changing anything.
 cat AGENTS.md
@@ -30,6 +30,8 @@ node scripts/verify-site.mjs
 ```
 
 Open `http://localhost:4173/`. Local development works from `/`; the production reverse-proxy contract is `/sound/`.
+
+External contributors and the implementation developer should follow `CONTRIBUTING.md`. All product work goes through a pull request; approved site changes deploy automatically after merge.
 
 ## Owner Decisions Needed Before Publication
 
@@ -56,6 +58,8 @@ deploy/                      Nginx template and renderer
 scripts/                     Verification, deployment, skills installer
 skills/                      Portable project skills
 .github/workflows/verify.yml GitHub CI verification
+.github/workflows/deploy-production.yml Gated merge-to-production deployment
+CONTRIBUTING.md              Contributor and release workflow
 ```
 
 ## Working With an Agent
