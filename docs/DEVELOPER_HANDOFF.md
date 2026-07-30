@@ -4,6 +4,8 @@
 
 Build and publish an owner-approved static marketing page at `/sound/` without modifying the independent `/soundscape/` site.
 
+Work on a feature branch and open a pull request. Do not run the production publisher from a developer workstation. CI verifies every PR; a reviewed merge to `main` automatically deploys changes to `index.html`, `site.config.js`, or `assets/`.
+
 This repository supplies a deployable shell, not product requirements. First resolve all required entries in `docs/CONTENT_BRIEF.md`.
 
 ## First 15 Minutes

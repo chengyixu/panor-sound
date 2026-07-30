@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+web_root=/www/wwwroot/www.panor.tech
+site_directory="$web_root/sound"
+previous_directory="$web_root/sound.previous"
+state_root=/var/lib/panor-sound-release
+backup_root=/var/backups/panor-sound
+incoming_root=/var/lib/panor-sound-deploy/incoming
+registry_files=(index.html server/data.json public/cross-promo.js sitemap.xml llms.txt)
+
+die() {
+  echo "panor-sound-release: $*" >&2
+  exit 2
+}
+
+validate_sha() {
+  [[ "${1:-}" =~ ^[0-9a-f]{40}$ ]] || die "commit SHA must be 40 lowercase hexadecimal characters"
+}
+
+validate_archive_path() {
+  local sha="$1"
+  local archive="$2"
+  [[ "$archive" == "$incoming_root/$sha.tgz" ]] || die "archive path is not approved"
+  [[ -f "$archive" && ! -L "$archive" ]] || die "release archive does not exist"
+  [[ "$(stat -c %U "$archive")" == panor-sound-deploy ]] || die "release archive owner is invalid"
+  [[ "$(stat -c %s "$archive")" -le 20971520 ]] || die "release archive exceeds 20 MiB"
+}
+
+restore_registry() {
+  local backup="$1"
+  local relative
+  for relative in "${registry_files[@]}"; do
+    install -D -o www -g www -m 0644 "$backup/registry/$relative" "$web_root/$relative"
+  done
+}
+
+rollback_release() {
+  local sha="$1"
+  local state_file="$state_root/current"
+  [[ -f "$state_file" ]] || die "no deployment state exists"
+  local current_sha backup previous_sha
+  IFS='|' read -r current_sha backup previous_sha < "$state_file"
+  [[ "$current_sha" == "$sha" ]] || die "commit $sha is not the current release"
+  [[ -d "$backup/registry" ]] || die "rollback registry backup is missing"
+
+  restore_registry "$backup"
+  if [[ -d "$site_directory" ]]; then
+    mv "$site_directory" "$backup/failed-site"
+  fi
+  if [[ -d "$previous_directory" ]]; then
+    mv "$previous_directory" "$site_directory"
+  elif [[ -d "$backup/site" ]]; then
+    mv "$backup/site" "$site_directory"
+  fi
+  printf '%s\n' "$previous_sha" > "$state_root/rolled-back-to"
+  rm -f "$state_file"
+  chown -R www:www "$site_directory" 2>/dev/null || true
+  echo "Rolled back Panor Sound release $sha"
+}
+
+deploy_release() {
+  local sha="$1"
+  local archive="$2"
+  validate_archive_path "$sha" "$archive"
+
+  mkdir -p "$state_root" "$backup_root"
+  local current_sha='none'
+  if [[ -f "$state_root/current" ]]; then
+    IFS='|' read -r current_sha _ _ < "$state_root/current"
+    if [[ "$current_sha" == "$sha" ]]; then
+      echo "Panor Sound release $sha is already current"
+      rm -f "$archive"
+      return
+    fi
+  fi
+
+  local release_date short_sha backup work bundle registry_stage site_stage applied
+  release_date="$(date +%Y%m%d)"
+  short_sha="${sha:0:12}"
+  backup="$backup_root/${release_date}-${short_sha}"
+  work="$(mktemp -d "$state_root/work.XXXXXX")"
+  bundle="$work/bundle"
+  registry_stage="$work/registry"
+  site_stage="$work/site"
+  applied=0
+
+  cleanup() {
+    local status=$?
+    if [[ $status -ne 0 && $applied -eq 1 && -d "$backup/registry" ]]; then
+      echo "Deployment failed after production mutation; restoring backup" >&2
+      restore_registry "$backup" || true
+      if [[ -d "$site_directory" ]]; then mv "$site_directory" "$backup/failed-site" || true; fi
+      if [[ -d "$previous_directory" ]]; then mv "$previous_directory" "$site_directory" || true; fi
+    fi
+    rm -rf "$work"
+    exit $status
+  }
+  trap cleanup EXIT
+
+  mkdir -p "$bundle" "$registry_stage" "$site_stage" "$backup/registry"
+  if tar -tzf "$archive" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
+    die "release archive contains path traversal"
+  fi
+  tar -xzf "$archive" --no-same-owner --no-same-permissions -C "$bundle"
+  if find "$bundle" -type l -o -type b -o -type c -o -type p -o -type s | grep -q .; then
+    die "release archive contains an unsupported file type"
+  fi
+  [[ -f "$bundle/index.html" && -f "$bundle/site.config.js" && -d "$bundle/assets" ]] || die "release archive is missing site files"
+  [[ -f "$bundle/panor/product.json" && -f "$bundle/deploy/update-panor-registry.mjs" ]] || die "release archive is missing Panor registration files"
+  if find "$bundle" -type f | sed "s#^$bundle/##" | grep -Ev '^(index\.html|site\.config\.js|assets/[A-Za-z0-9._/-]+|panor/product\.json|deploy/update-panor-registry\.mjs)$' | grep -q .; then
+    die "release archive contains an unapproved path"
+  fi
+  grep -Eq 'ready:[[:space:]]*true' "$bundle/site.config.js" || die "release is not marked production-ready"
+  if grep -Eqi 'Replace with|placeholder|Draft marketing site|_Required_' "$bundle/site.config.js" "$bundle/panor/product.json"; then
+    die "release contains scaffold placeholders"
+  fi
+  grep -Fq 'https://www.panor.tech/sound/' "$bundle/index.html" || die "release is missing the canonical URL"
+  grep -Fq 'index, follow, max-image-preview:large, max-snippet:-1' "$bundle/index.html" || die "release robots policy is invalid"
+  grep -Fq 'https://quge5.com/88/tag.min.js' "$bundle/index.html" || die "release is missing approved Monetag"
+  grep -Fq 'data-zone="264769"' "$bundle/index.html" || die "release uses the wrong Monetag zone"
+  grep -Fq '/public/cross-promo.js' "$bundle/index.html" || die "release is missing Panor cross-promotion"
+  if grep -Eqi 'adsbygoogle|pagead2\.googlesyndication\.com|ca-pub-' "$bundle/index.html"; then
+    die "release contains a forbidden AdSense marker"
+  fi
+
+  local relative
+  for relative in "${registry_files[@]}"; do
+    [[ -f "$web_root/$relative" ]] || die "production registry file is missing: $relative"
+    install -D -m 0644 "$web_root/$relative" "$registry_stage/$relative"
+    install -D -m 0644 "$web_root/$relative" "$backup/registry/$relative"
+  done
+
+  node "$bundle/deploy/update-panor-registry.mjs" \
+    --root "$registry_stage" \
+    --manifest "$bundle/panor/product.json" \
+    --date "$(date +%Y-%m-%d)" \
+    --apply
+
+  install -m 0644 "$bundle/index.html" "$site_stage/index.html"
+  install -m 0644 "$bundle/site.config.js" "$site_stage/site.config.js"
+  cp -a "$bundle/assets" "$site_stage/assets"
+  find "$site_stage" -type d -exec chmod 0755 {} +
+  find "$site_stage" -type f -exec chmod 0644 {} +
+  chown -R www:www "$site_stage"
+
+  cp -a "$web_root/index.html" "$web_root/index.html.bak.${release_date}.${short_sha}"
+  cp -a "$web_root/sitemap.xml" "$web_root/sitemap.xml.bak.${release_date}.${short_sha}"
+  chown www:www "$web_root/index.html.bak.${release_date}.${short_sha}" "$web_root/sitemap.xml.bak.${release_date}.${short_sha}"
+
+  applied=1
+  for relative in "${registry_files[@]}"; do
+    install -D -o www -g www -m 0644 "$registry_stage/$relative" "$web_root/$relative"
+  done
+
+  if [[ -d "$previous_directory" ]]; then mv "$previous_directory" "$backup/older-previous"; fi
+  if [[ -d "$site_directory" ]]; then mv "$site_directory" "$previous_directory"; fi
+  mv "$site_stage" "$site_directory"
+  chown -R www:www "$site_directory"
+  nginx -t
+
+  printf '%s|%s|%s\n' "$sha" "$backup" "$current_sha" > "$state_root/current"
+  chmod 0600 "$state_root/current"
+  rm -f "$archive"
+  applied=0
+  echo "Deployed Panor Sound release $sha"
+}
+
+submit_indexnow() {
+  local sha="$1"
+  [[ -f "$state_root/current" ]] || die "no deployment state exists"
+  local current_sha
+  IFS='|' read -r current_sha _ _ < "$state_root/current"
+  [[ "$current_sha" == "$sha" ]] || die "commit $sha is not the current release"
+  "$web_root/indexnow-submit.sh" https://www.panor.tech/sound/
+}
+
+command="${1:-}"
+sha="${2:-}"
+validate_sha "$sha"
+case "$command" in
+  deploy) deploy_release "$sha" "${3:-}" ;;
+  rollback) rollback_release "$sha" ;;
+  indexnow) submit_indexnow "$sha" ;;
+  *) die "usage: panor-sound-release deploy SHA ARCHIVE | rollback SHA | indexnow SHA" ;;
+esac

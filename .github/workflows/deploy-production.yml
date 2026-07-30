@@ -1,0 +1,105 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - site.config.js
+      - assets/**
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: panor-sound-production
+  cancel-in-progress: false
+
+jobs:
+  verify-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: ''
+      - run: node scripts/verify-site.mjs --production
+      - run: node scripts/test-panor-registry.mjs
+      - name: Require a merged pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count="$(gh api \
+            -H 'Accept: application/vnd.github+json' \
+            "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" \
+            --jq '[.[] | select(.merged_at != null and .base.ref == "main")] | length')"
+          test "$count" -gt 0 || {
+            echo 'Production deployment requires a pull request merged into main.' >&2
+            exit 1
+          }
+
+  deploy:
+    needs: verify-release
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.panor.tech/sound/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: ''
+      - name: Configure production SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.PANOR_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PANOR_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/panor-sound-deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/panor-sound-deploy ~/.ssh/known_hosts
+      - name: Capture /soundscape/ isolation fingerprint
+        run: curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape.sha"
+      - name: Package release
+        run: tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
+      - name: Upload and deploy atomically
+        id: deploy
+        env:
+          HOST: ${{ vars.PANOR_DEPLOY_HOST }}
+          PORT: ${{ vars.PANOR_DEPLOY_PORT }}
+          USER: ${{ vars.PANOR_DEPLOY_USER }}
+        run: |
+          ssh_args=(-i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT")
+          scp -q -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -P "$PORT" \
+            "$RUNNER_TEMP/${GITHUB_SHA}.tgz" "$USER@$HOST:/var/lib/panor-sound-deploy/incoming/${GITHUB_SHA}.tgz"
+          ssh "${ssh_args[@]}" "$USER@$HOST" \
+            "sudo /usr/local/sbin/panor-sound-release deploy '$GITHUB_SHA' '/var/lib/panor-sound-deploy/incoming/${GITHUB_SHA}.tgz'"
+      - name: Verify production and Panor registration
+        id: smoke
+        run: node scripts/smoke-production.mjs "$GITHUB_SHA"
+      - name: Confirm /soundscape/ was unchanged
+        id: isolation
+        run: |
+          curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape-after.sha"
+          cmp "$RUNNER_TEMP/soundscape.sha" "$RUNNER_TEMP/soundscape-after.sha"
+      - name: Roll back failed release
+        if: always() && steps.deploy.outcome == 'success' && (steps.smoke.outcome == 'failure' || steps.isolation.outcome == 'failure')
+        env:
+          HOST: ${{ vars.PANOR_DEPLOY_HOST }}
+          PORT: ${{ vars.PANOR_DEPLOY_PORT }}
+          USER: ${{ vars.PANOR_DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST" \
+            "sudo /usr/local/sbin/panor-sound-release rollback '$GITHUB_SHA'"
+      - name: Submit IndexNow notification
+        if: success()
+        env:
+          HOST: ${{ vars.PANOR_DEPLOY_HOST }}
+          PORT: ${{ vars.PANOR_DEPLOY_PORT }}
+          USER: ${{ vars.PANOR_DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST" \
+            "sudo /usr/local/sbin/panor-sound-release indexnow '$GITHUB_SHA'"
