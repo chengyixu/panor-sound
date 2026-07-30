@@ -89,7 +89,7 @@ node scripts/verify-site.mjs --production
 
 ## Deployment
 
-The website is designed for an Nginx-hosted static directory at `/sound/`. No host, service account, web root, or credential is stored in Git.
+The website is designed for an Nginx-hosted static directory at `/sound/`. Production credentials are stored only in the GitHub `production` environment.
 
 ```bash
 # Render a snippet for the owner-provisioned Nginx server.
@@ -103,7 +103,7 @@ SOUND_WEB_PARENT=/absolute/web/root \
   ./deploy/publish-static.sh --dry-run
 ```
 
-The actual production release requires `--apply`, an approved clean commit, and explicit owner approval. Follow `docs/DEPLOYMENT.md` exactly. This repository never alters `/soundscape/`.
+Pull requests run structural checks. Any PR that changes `index.html`, `site.config.js`, or `assets/` must also pass the production-readiness policy, including approved content, full Panor SEO, Monetag-only monetization, and registration metadata. A reviewed merge into `main` is the production approval signal and automatically deploys the release. Direct pushes do not deploy because the workflow requires an associated merged PR. Follow `docs/DEPLOYMENT.md` for provisioning and rollback details. This repository never alters `/soundscape/`.
 
 ## Validation
 
@@ -111,7 +111,7 @@ The actual production release requires `--apply`, an approved clean commit, and 
 node scripts/verify-site.mjs
 ```
 
-The check confirms the required static files, the `/sound/` production configuration, configuration-driven rendering, no legacy `/soundscape/` route, and a valid Nginx template. GitHub Actions runs the same command on push and pull request.
+The check confirms the required static files, the `/sound/` production configuration, configuration-driven rendering, no legacy `/soundscape/` route, and a valid Nginx template. Release changes additionally run `node scripts/verify-site.mjs --production`, the Panor registry idempotency test, and post-deployment smoke checks.
 
 ## Handoff
 
