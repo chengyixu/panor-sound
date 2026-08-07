@@ -166,6 +166,15 @@ deploy_release() {
   echo "Deployed Panor Sound release $sha"
 }
 
+
+self_update() {
+  local new_script="$1"
+  [[ -f "$new_script" ]] || die "new release script not found at $new_script"
+  install -o root -g root -m 0755 "$new_script" /usr/local/sbin/panor-sound-release
+  rm -f "$new_script"
+  echo "Release script self-updated"
+}
+
 submit_indexnow() {
   local sha="$1"
   [[ -f "$state_root/current" ]] || die "no deployment state exists"
@@ -176,11 +185,17 @@ submit_indexnow() {
 }
 
 command="${1:-}"
+case "$command" in
+  self-update)
+    self_update "${2:-}"
+    exit 0
+    ;;
+esac
 sha="${2:-}"
 validate_sha "$sha"
 case "$command" in
   deploy) deploy_release "$sha" "${3:-}" ;;
   rollback) rollback_release "$sha" ;;
   indexnow) submit_indexnow "$sha" ;;
-  *) die "usage: panor-sound-release deploy SHA ARCHIVE | rollback SHA | indexnow SHA" ;;
+  *) die "usage: panor-sound-release deploy SHA ARCHIVE | rollback SHA | indexnow SHA | self-update NEW_SCRIPT" ;;
 esac
