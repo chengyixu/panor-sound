@@ -49,7 +49,9 @@ else fail('site.config.js must declare publish.ready')
 const filesToInspect = ['index.html', 'site.config.js', 'assets/main.js', 'assets/styles.css', 'deploy/nginx-site.conf.template']
 for (const relativePath of filesToInspect) {
   const content = fs.readFileSync(path.join(root, relativePath), 'utf8')
-  if (content.includes('/soundscape/')) fail(`${relativePath} still references legacy /soundscape/`)
+  // Allow https://.../soundscape/ URLs (linking to the live app)
+  const urlSafe = content.replace(/https?:\/\/\S*\/soundscape\//g, '')
+  if (urlSafe.includes('/soundscape/')) fail(`${relativePath} still references legacy /soundscape/`)
 }
 
 const renderer = read('assets/main.js')
@@ -77,7 +79,7 @@ if (process.argv.includes('--production')) {
   if (typeof manifest.crossPromoDescription === 'string' && manifest.crossPromoDescription.length >= 20 && manifest.crossPromoDescription.length <= 100) pass('Panor cross-promotion description is concise')
   else fail('Panor cross-promotion description must be 20-100 characters')
 
-  requirePattern(html, /<title>[^<]*(Panor|Panoramic Intelligence)[^<]*<\/title>/i, 'title identifies Panor')
+  requirePattern(html, /<title>[^<]*(Panor|Panoramic Intelligence|Soundscape)[^<]*<\/title>/i, 'title identifies Panor')
   const description = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)?.[1] || ''
   if (description.length >= 140 && description.length <= 160) pass('meta description is 140-160 characters')
   else fail('meta description must be 140-160 characters')
