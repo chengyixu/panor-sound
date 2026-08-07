@@ -1,6 +1,7 @@
 name: Deploy production
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -65,6 +66,14 @@ jobs:
         run: curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape.sha"
       - name: Package release
         run: COPYFILE_DISABLE=1 tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
+      - name: Provision release script
+        env:
+          HOST: ${{ vars.PANOR_DEPLOY_HOST }}
+          PORT: ${{ vars.PANOR_DEPLOY_PORT }}
+          USER: ${{ vars.PANOR_DEPLOY_USER }}
+        run: |
+          scp -q -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -P "$PORT"             deploy/server/panor-sound-release "$USER@$HOST:/tmp/panor-sound-release"
+          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST"             "sudo install -o root -g root -m 0755 /tmp/panor-sound-release /usr/local/sbin/panor-sound-release && rm /tmp/panor-sound-release && echo 'Release script provisioned'"
       - name: Upload and deploy atomically
         id: deploy
         env:
