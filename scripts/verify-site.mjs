@@ -49,7 +49,9 @@ else fail('site.config.js must declare publish.ready')
 const filesToInspect = ['index.html', 'site.config.js', 'assets/main.js', 'assets/styles.css', 'deploy/nginx-site.conf.template']
 for (const relativePath of filesToInspect) {
   const content = fs.readFileSync(path.join(root, relativePath), 'utf8')
-  if (content.includes('/soundscape/')) fail(`${relativePath} still references legacy /soundscape/`)
+  // Allow https://.../soundscape/ URLs (linking to the live app)
+  const urlSafe = content.replace(/https?:\/\/\S*\/soundscape\//g, '')
+  if (urlSafe.includes('/soundscape/')) fail(`${relativePath} still references legacy /soundscape/`)
 }
 
 const renderer = read('assets/main.js')
