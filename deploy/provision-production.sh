@@ -11,7 +11,7 @@ if [[ -z "$target" || -z "$public_key_file" || ! -f "$public_key_file" ]]; then
 fi
 
 work="$(mktemp -d)"
-trap 'rm -rf "$work"' EXIT
+trap 'rm -rf "${work:-}"' EXIT
 SITE_BASE_PATH=/sound SITE_WEB_PARENT=/www/wwwroot/www.panor.tech \
   node "$repo_root/deploy/render-nginx-config.mjs" > "$work/panor-sound.conf"
 cp "$repo_root/deploy/server/panor-sound-release" "$work/panor-sound-release"
