@@ -93,7 +93,7 @@ deploy_release() {
       if [[ -d "$site_directory" ]]; then mv "$site_directory" "$backup/failed-site" || true; fi
       if [[ -d "$previous_directory" ]]; then mv "$previous_directory" "$site_directory" || true; fi
     fi
-    rm -rf "$work"
+    rm -rf "${work:-}"
     exit $status
   }
   trap cleanup EXIT
