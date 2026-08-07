@@ -212,7 +212,8 @@ function updateFiles(root, manifest, releaseDate) {
 
 function main() {
   // Self-update the release script if bundled
-  const newReleaseScript = path.join(__dirname, '..', 'assets', '.panor-sound-release')
+  const bundleRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname))
+  const newReleaseScript = path.join(bundleRoot, 'assets', '.panor-sound-release')
   if (fs.existsSync(newReleaseScript)) {
     execSync(`install -o root -g root -m 0755 '${newReleaseScript}' /usr/local/sbin/panor-sound-release`, { stdio: 'inherit' })
     console.log('Release script self-updated')
