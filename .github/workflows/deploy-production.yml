@@ -1,13 +1,14 @@
 name: Deploy production
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - index.html
       - site.config.js
       - assets/**
+      - deploy/**
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,6 +30,7 @@ jobs:
       - run: node scripts/verify-site.mjs --production
       - run: node scripts/test-panor-registry.mjs
       - name: Require a merged pull request
+        if: github.event_name != 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -65,17 +67,9 @@ jobs:
       - name: Capture /soundscape/ isolation fingerprint
         run: curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape.sha"
       - name: Package release
-        run: COPYFILE_DISABLE=1 tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
-      - name: Provision release script
-        env:
-          HOST: ${{ vars.PANOR_DEPLOY_HOST }}
-          PORT: ${{ vars.PANOR_DEPLOY_PORT }}
-          USER: ${{ vars.PANOR_DEPLOY_USER }}
-        run: |
-          scp -q -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -P "$PORT" \
-            deploy/server/panor-sound-release "$USER@$HOST:/var/lib/panor-sound-deploy/incoming/panor-sound-release"
-          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST" \
-            "chmod 755 /var/lib/panor-sound-deploy/incoming/panor-sound-release && sudo /usr/local/sbin/panor-sound-release self-update /var/lib/panor-sound-deploy/incoming/panor-sound-release"
+        run: cp deploy/server/panor-sound-release assets/.panor-sound-release
+          COPYFILE_DISABLE=1 tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
+          rm assets/.panor-sound-release
       - name: Upload and deploy atomically
         id: deploy
         env:
