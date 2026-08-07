@@ -247,7 +247,14 @@ function renderFooter() {
 /* ---- Bootstrap ---- */
 document.documentElement.lang = config.site.locale || 'en'
 document.title = config.site.title || config.site.name
-document.querySelector('meta[name="description"]')?.setAttribute('content', config.site.description || '')
+const desc = config.site.description || ''
+document.querySelector('meta[name="description"]')?.setAttribute('content', desc)
+document.querySelector('meta[property="og:title"]')?.setAttribute('content', config.site.title || config.site.name)
+document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc)
+document.querySelector('meta[property="og:url"]')?.setAttribute('content', 'https://www.panor.tech' + (config.site.basePath || '/'))
+document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', config.site.title || config.site.name)
+document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', desc)
+
 byId('brand').textContent = config.site.name
 byId('brand').setAttribute('aria-label', `${config.site.name} home`)
 

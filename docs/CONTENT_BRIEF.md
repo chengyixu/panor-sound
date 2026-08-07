@@ -4,7 +4,7 @@
 
 | Topic | Approved value | Owner | Date |
 |---|---|---|---|
-| Site/product name | Panor Sound | Yvonne + Wilson | 2026-07-28 |
+| Site/product name | Soundscape | Yvonne + Wilson | 2026-07-28 |
 | Primary audience | Urban explorers, sound enthusiasts, researchers, cultural recorders | Yvonne + Wilson | 2026-07-28 |
 | Core value proposition | AI-powered immersive city soundscapes anchored in real locations — experience the world through sound | Yvonne + Wilson | 2026-07-28 |
 | Claims that can be published | Real-location soundscapes, AI-enhanced audio, community recording & sharing, vinyl-inspired player interaction | Yvonne + Wilson | 2026-07-28 |

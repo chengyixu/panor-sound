@@ -1,5 +1,5 @@
 /*
- * Panor Sound marketing page at /sound/
+ * Soundscape marketing page at /sound/
  * Minimalist black & white, immersive listening aesthetic.
  */
 window.SOUND_SITE_CONFIG = {
@@ -7,9 +7,9 @@ window.SOUND_SITE_CONFIG = {
     ready: true,
   },
   site: {
-    name: 'Panor Sound',
+    name: 'Soundscape',
     basePath: '/sound/',
-    title: 'Panor Sound — Immersive City Soundscapes',
+    title: 'Soundscape — Immersive City Soundscapes',
     description:
       'Experience the world through sound. AI-powered immersive soundscapes anchored in real locations. Record, share, and discover the sonic texture of cities.',
     locale: 'en',
@@ -20,7 +20,7 @@ window.SOUND_SITE_CONFIG = {
     { label: 'Hall of Fame', href: '#hall-of-fame' },
   ],
   hero: {
-    eyebrow: 'Panor Sound',
+    eyebrow: 'Soundscape',
     heading: 'The World Has a Soundtrack.',
     body: 'Real locations, real sounds, transformed by AI into immersive soundscapes. Step into the sonic texture of cities — record your corner of the world, or lose yourself in someone else\'s.',
     actions: [
@@ -67,7 +67,7 @@ window.SOUND_SITE_CONFIG = {
       heading: 'Hall of Fame',
       contributors: {
         heading: 'Contributors & Credits',
-        body: 'The voices, ears, and minds that make Panor Sound possible.',
+        body: 'The voices, ears, and minds that make Soundscape possible.',
         people: [
           { name: 'Prof. PerMagnus Lindborg', role: 'Soundscape Research Lead', affiliation: 'MMHK, City University of Hong Kong', contribution: '20+ field recording sites across Hong Kong. Foundational research in urban soundscape perception.' },
           { name: 'Yvonne', role: 'Co-Founder & Research Director', affiliation: 'City University of Hong Kong', contribution: 'Soundscape heritage framework, community research, and platform vision.' },
@@ -81,7 +81,7 @@ window.SOUND_SITE_CONFIG = {
       },
       team: {
         heading: 'Team & Contact',
-        body: 'Panor Sound is built by a cross-disciplinary team of researchers, engineers, and designers who believe sound changes how we experience place. We\'re always open to collaboration.',
+        body: 'Soundscape is built by a cross-disciplinary team of researchers, engineers, and designers who believe sound changes how we experience place. We\'re always open to collaboration.',
         contact: { label: 'Contact Us', href: 'mailto:hello@panor.tech' },
       },
       events: {
@@ -95,7 +95,7 @@ window.SOUND_SITE_CONFIG = {
     },
   ],
   footer: {
-    text: 'Panor Sound — Listen Deeper.',
+    text: 'Soundscape — Listen Deeper.',
     links: [
       { label: 'Soundscape App', href: 'https://www.panor.tech/soundscape/' },
       { label: 'GitHub', href: 'https://github.com/chengyixu/panor-sound', external: true },

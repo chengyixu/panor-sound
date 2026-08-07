@@ -2,11 +2,11 @@
   "slug": "sound",
   "path": "/sound/",
   "url": "https://www.panor.tech/sound/",
-  "name": "Sound",
-  "description": "Replace with the owner-approved 140-160 character product description before launch.",
+  "name": "Soundscape",
+  "description": "Experience the world through sound. AI-powered immersive soundscapes anchored in real locations. Record, share, and discover the sonic texture of cities.",
   "category": "Lifestyle, Travel & Creative",
   "crossPromoTag": "Creative",
-  "crossPromoDescription": "Replace with a short owner-approved cross-promotion description.",
+  "crossPromoDescription": "Immersive city soundscapes \u2014 AI-powered audio experiences anchored in real locations worldwide.",
   "homepageCollection": "services",
-  "llmsDescription": "Replace with the owner-approved one-line product description before launch."
+  "llmsDescription": "Soundscape is an AI-powered immersive soundscape platform that anchors real-world recordings to geographic locations. Users record, share, and discover the sonic texture of cities through a vinyl-inspired interactive player."
 }

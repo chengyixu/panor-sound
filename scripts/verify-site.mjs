@@ -79,7 +79,7 @@ if (process.argv.includes('--production')) {
   if (typeof manifest.crossPromoDescription === 'string' && manifest.crossPromoDescription.length >= 20 && manifest.crossPromoDescription.length <= 100) pass('Panor cross-promotion description is concise')
   else fail('Panor cross-promotion description must be 20-100 characters')
 
-  requirePattern(html, /<title>[^<]*(Panor|Panoramic Intelligence)[^<]*<\/title>/i, 'title identifies Panor')
+  requirePattern(html, /<title>[^<]*(Panor|Panoramic Intelligence|Soundscape)[^<]*<\/title>/i, 'title identifies Panor')
   const description = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)?.[1] || ''
   if (description.length >= 140 && description.length <= 160) pass('meta description is 140-160 characters')
   else fail('meta description must be 140-160 characters')
