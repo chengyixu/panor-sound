@@ -72,8 +72,10 @@ jobs:
           PORT: ${{ vars.PANOR_DEPLOY_PORT }}
           USER: ${{ vars.PANOR_DEPLOY_USER }}
         run: |
-          scp -q -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -P "$PORT"             deploy/server/panor-sound-release "$USER@$HOST:/tmp/panor-sound-release"
-          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST"             "sudo install -o root -g root -m 0755 /tmp/panor-sound-release /usr/local/sbin/panor-sound-release && rm /tmp/panor-sound-release && echo 'Release script provisioned'"
+          scp -q -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -P "$PORT" \
+            deploy/server/panor-sound-release "$USER@$HOST:/var/lib/panor-sound-deploy/incoming/panor-sound-release"
+          ssh -i ~/.ssh/panor-sound-deploy -o BatchMode=yes -o IdentitiesOnly=yes -p "$PORT" "$USER@$HOST" \
+            "chmod 755 /var/lib/panor-sound-deploy/incoming/panor-sound-release && sudo /usr/local/sbin/panor-sound-release self-update /var/lib/panor-sound-deploy/incoming/panor-sound-release"
       - name: Upload and deploy atomically
         id: deploy
         env:
