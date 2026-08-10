@@ -30,3 +30,15 @@ entries:
     chaos: null
     observable_signal: "The post-deploy browser step owns both browser installation and npm run test:production; any failure satisfies the rollback condition."
     prevention: "Keep all post-deploy browser prerequisites inside the step whose failure triggers atomic rollback."
+  - id: production-proof-assumes-inline-stat-text
+    user_visible_symptom: A correct live release is rolled back because the browser proof expects a statistic's number and label on one text line.
+    lint: "The source guard requires production totals to be asserted through the stat card's strong and span elements."
+    chaos: null
+    observable_signal: "The production proof compares the rendered count and label separately, independent of layout whitespace."
+    prevention: "Assert semantic DOM fields instead of flattened body text when layout elements intentionally create line breaks."
+  - id: production-proof-races-map-tile
+    user_visible_symptom: A correct live release is rolled back because map markers render before the first CARTO tile response is observed.
+    lint: "The source guard requires the production proof to await the successful tile-response promise."
+    chaos: null
+    observable_signal: "The production proof waits up to 15 seconds for a CARTO HTTP 200 after the map is initialized."
+    prevention: "Wait on the external response event instead of sampling a response array immediately after DOM readiness."

@@ -7,6 +7,7 @@ const config = fs.readFileSync(new URL('../../site.config.js', import.meta.url),
 const renderer = fs.readFileSync(new URL('../../assets/ui/live-page.js', import.meta.url), 'utf8')
 const packageJson = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8'))
 const deployWorkflow = fs.readFileSync(new URL('../../.github/workflows/deploy-production.yml', import.meta.url), 'utf8')
+const productionProof = fs.readFileSync(new URL('../e2e/production-live-page.e2e.test.mjs', import.meta.url), 'utf8')
 const sandbox = { window: {} }
 vm.runInNewContext(config, sandbox)
 
@@ -46,4 +47,17 @@ test('production proof is isolated from pre-merge tests', () => {
   assert.match(verifyRelease, /npx playwright install --with-deps chromium[\s\S]*npm run test:e2e/)
   assert.match(deployWorkflow, /id: browser[\s\S]*npx playwright install --with-deps chromium[\s\S]*npm run test:production/)
   assert.match(deployWorkflow, /steps\.browser\.outcome == 'failure'/)
+})
+
+test('production totals are asserted through semantic stat elements', () => {
+  assert.match(productionProof, /locator\('\.archive-stat'\)\.first\(\)/)
+  assert.match(productionProof, /recordingStat\.locator\('strong'\)/)
+  assert.match(productionProof, /recordingStat\.locator\('span'\)/)
+  assert.doesNotMatch(productionProof, /model\.stats\.recordings} published recordings/)
+})
+
+test('production map proof waits for a successful tile response', () => {
+  assert.match(productionProof, /response\.status\(\) === 200\) resolveTileLoaded\(\)/)
+  assert.match(productionProof, /Promise\.race\(\[\s*tileLoaded,/)
+  assert.doesNotMatch(productionProof, /tileResponses\.some/)
 })
