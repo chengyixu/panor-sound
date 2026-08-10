@@ -3,26 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Experience the world through sound. AI-powered immersive city soundscapes anchored in real locations. Record, share, discover sonic textures worldwide." />
+    <meta name="description" content="Listen to live community field recordings from real places, explore every published location on an interactive map, and enter Soundscape to record your own." />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-    <title>Soundscape — Immersive City Soundscapes</title>
+    <title>Soundscape — Live Recordings from Real Places</title>
     <link rel="canonical" href="https://www.panor.tech/sound/" />
     <link rel="stylesheet" href="./assets/styles.css" />
+    <link rel="stylesheet" href="./assets/vendor/leaflet/leaflet.css" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Soundscape — Immersive City Soundscapes" />
-    <meta property="og:description" content="Experience the world through sound. AI-powered immersive city soundscapes anchored in real locations. Record, share, discover sonic textures worldwide." />
+    <meta property="og:title" content="Soundscape — Live Recordings from Real Places" />
+    <meta property="og:description" content="Listen to live community field recordings, explore every published location, and enter Soundscape to record your own." />
     <meta property="og:url" content="https://www.panor.tech/sound/" />
     <meta property="og:site_name" content="Soundscape" />
-    <meta property="og:image" content="https://www.panor.tech/sound/assets/covers/80c3ec82c7324720a279bc3bc7c8aa10.png" />
+    <meta property="og:image" content="https://www.panor.tech/soundscape/icons/icon-512.png" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Soundscape — Immersive City Soundscapes" />
-    <meta name="twitter:description" content="Experience the world through sound. AI-powered immersive city soundscapes anchored in real locations. Record, share, discover sonic textures worldwide." />
-    <meta name="twitter:image" content="https://www.panor.tech/sound/assets/covers/80c3ec82c7324720a279bc3bc7c8aa10.png" />
+    <meta name="twitter:title" content="Soundscape — Live Recordings from Real Places" />
+    <meta name="twitter:description" content="Listen to live community field recordings, explore every published location, and enter Soundscape to record your own." />
+    <meta name="twitter:image" content="https://www.panor.tech/soundscape/icons/icon-512.png" />
 
     <!-- JSON-LD: SoftwareApplication -->
     <script type="application/ld+json">
@@ -31,7 +32,7 @@
       "@type": "SoftwareApplication",
       "name": "Soundscape",
       "url": "https://www.panor.tech/sound/",
-      "description": "AI-powered immersive soundscapes anchored in real locations. Record, share, and discover the sonic texture of cities.",
+      "description": "A live public archive of community field recordings anchored in real locations, with interactive listening and mapping.",
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "Web"
     }
@@ -99,10 +100,22 @@
 
     <noscript>
       <p class="noscript">
-        Soundscape brings the world to your ears. We capture the sonic texture of cities — from the hum of a Hong Kong wet market to the quiet of a temple garden — and transform field recordings into immersive AI-powered soundscapes. Every location tells a story. Our library spans urban centers across Asia: Mong Kok footbridges at dusk, Victoria Park at dawn, Star Ferry terminals, and the narrow alleys of Shenzhen and Shanghai. Listen to curated Editor's Picks, explore the Sound Gallery on an interactive map, or browse community favorites. Discover featured soundscapes from Hong Kong, Shenzhen, Shanghai, and beyond. The Hall of Fame celebrates the researchers, field recordists, and engineers behind every track — including contributions from City University of Hong Kong and the MMHK Research Archive. Join sound walks through Mong Kok after dark, attend field recording workshops, or contribute your own recordings to our growing community library. Soundscape is built by a cross-disciplinary team who believe sound changes how we experience place. This site needs JavaScript to render its full interactive experience. For the best experience, enable JavaScript and visit us at panor.tech/sound.
+        Soundscape is a live public archive of field recordings anchored in real places. The interactive version of this page requests the current public recording feed and ranking feed directly from the Soundscape service each time it loads. Titles, descriptions, creators, locations, coordinates, durations, play totals, audio files, featured rows, contributor summaries, and archive statistics are derived from those responses rather than copied into this website. Explicit test or demo records are excluded from the public presentation. JavaScript is required to request that live information, draw the geographic map, open recording details, and play audio in the fixed listening panel. If JavaScript is disabled, this fallback cannot truthfully reproduce a changing archive snapshot. Open the Soundscape application to browse the complete current collection, sign in or register through Panor unified auth, record a new field sound, and publish it with its real location. The Sound page is a read-only public discovery surface: it does not duplicate the Soundscape database, own authentication, store account credentials, or provide a second publishing workflow. Availability of recordings, rankings, audio, and map locations therefore follows the live Soundscape backend.
       </p>
     </noscript>
+    <section class="live-player" id="live-player" aria-label="Soundscape audio player" hidden>
+      <button class="live-player-close" id="live-player-close" type="button" aria-label="Close audio player">×</button>
+      <img class="live-player-cover" id="live-player-cover" alt="" hidden />
+      <div class="live-player-copy">
+        <strong id="live-player-title"></strong>
+        <span id="live-player-location"></span>
+        <span id="live-player-description"></span>
+      </div>
+      <audio id="live-player-audio" controls preload="metadata"></audio>
+      <a class="live-player-app-link" id="live-player-app-link">Open in Soundscape</a>
+    </section>
     <script src="./site.config.js"></script>
+    <script src="./assets/vendor/leaflet/leaflet.js"></script>
     <script src="/public/cross-promo.js" defer></script>
     <script type="module" src="./assets/main.js"></script>
   </body>

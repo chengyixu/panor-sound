@@ -3,10 +3,10 @@
   "path": "/sound/",
   "url": "https://www.panor.tech/sound/",
   "name": "Soundscape",
-  "description": "Experience the world through sound. AI-powered immersive soundscapes anchored in real locations. Record, share, and discover the sonic texture of cities.",
+  "description": "Listen to the live Soundscape archive: public field recordings, current popularity, and real locations loaded directly from the backend.",
   "category": "Lifestyle, Travel & Creative",
   "crossPromoTag": "Creative",
-  "crossPromoDescription": "Immersive city soundscapes \u2014 AI-powered audio experiences anchored in real locations worldwide.",
+  "crossPromoDescription": "Live field recordings from real places, with an interactive map and audio player.",
   "homepageCollection": "services",
-  "llmsDescription": "Soundscape is an AI-powered immersive soundscape platform that anchors real-world recordings to geographic locations. Users record, share, and discover the sonic texture of cities through a vinyl-inspired interactive player."
+  "llmsDescription": "Soundscape is a live public archive of field recordings anchored to real locations. The /sound/ page loads current recordings and rankings from the Soundscape backend, while the /soundscape/ application owns accounts, recording, and publishing."
 }

@@ -1,0 +1,56 @@
+labels:
+  platform: linux/amd64
+
+when:
+  - event: [pull_request, push]
+    branch: main
+
+steps:
+  syntax-unit:
+    image: node:22-bookworm
+    commands:
+      - npm ci --ignore-scripts
+      - npm run check:syntax
+      - npm test
+
+  browser-contract:
+    image: mcr.microsoft.com/playwright:v1.58.2-noble
+    commands:
+      - npm ci --ignore-scripts
+      - npm run test:e2e
+
+  production-policy:
+    image: node:22-bookworm
+    commands:
+      - npm ci --ignore-scripts
+      - node scripts/verify-site.mjs --production
+      - node scripts/test-panor-registry.mjs
+
+  guards:
+    image: node:22-bookworm
+    commands:
+      - bash scripts/repo-guards.sh
+
+  ci-success:
+    image: alpine:3.20
+    commands:
+      - apk add --no-cache bash curl jq openssl coreutils >/dev/null
+      - bash .woodpecker/ci-success-bridge.sh success
+    environment:
+      NEXORA_APP_ID: "2705324"
+      NEXORA_APP_PRIVATE_KEY:
+        from_secret: nexora_app_private_key
+    depends_on: [syntax-unit, browser-contract, production-policy, guards]
+
+  ci-failure:
+    image: alpine:3.20
+    commands:
+      - apk add --no-cache bash curl jq openssl coreutils >/dev/null
+      - bash .woodpecker/ci-success-bridge.sh failure
+    environment:
+      NEXORA_APP_ID: "2705324"
+      NEXORA_APP_PRIVATE_KEY:
+        from_secret: nexora_app_private_key
+    depends_on: [syntax-unit, browser-contract, production-policy, guards]
+    when:
+      - status: failure

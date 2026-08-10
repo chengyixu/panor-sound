@@ -1,0 +1,32 @@
+project: panor-sound
+entries:
+  - id: static-snapshot-passes-ci
+    user_visible_symptom: The Sound page shows stale or invented recordings while CI remains green.
+    lint: "site.config.js must not contain backend wire fields or known snapshot titles"
+    chaos: null
+    observable_signal: "Both /soundscape/api feeds appear in browser network traffic and rendered titles equal those responses."
+    prevention: "Keep recording data backend-owned; enforce with source guards, contract tests, and production Playwright proof."
+  - id: detached-leaflet-zero-markers
+    user_visible_symptom: The map area loads but every marker has zero geometry and cannot be seen or selected.
+    lint: "Leaflet initialization must run only after the map container is attached."
+    chaos: null
+    observable_signal: "test/e2e/live-page.e2e.test.mjs requires every .leaflet-interactive path to have a positive bounding box and a non-M0 0 path."
+    prevention: "Render sections first, then initialize the map through the returned initializer."
+  - id: backend-test-record-leaks-publicly
+    user_visible_symptom: A public test or demo upload appears as a featured recording, top ranking, map marker, or archive statistic.
+    lint: "NON_PRODUCTION_TITLE is the single domain filter for explicit test/demo/sample/placeholder/TBA title tokens."
+    chaos: null
+    observable_signal: "The domain regression test injects a 9,999-play KFC TEST row and proves it is absent from the complete model."
+    prevention: "Filter once before every derived public surface; never patch individual UI sections."
+  - id: play-telemetry-blocks-player-close
+    user_visible_symptom: Closing the audio player stalls while anonymous play telemetry is pending.
+    lint: null
+    chaos: "The fixture browser test delays the play POST by 1.5 seconds."
+    observable_signal: "The player must become hidden within 750 milliseconds while the telemetry request is still pending."
+    prevention: "Start keepalive telemetry in the background, then synchronously pause and dismiss the player."
+  - id: deploy-browser-proof-can-skip-without-rollback
+    user_visible_symptom: A release can remain deployed when Chromium is unavailable, so live backend rendering was never proved.
+    lint: "The deployment source guard requires Chromium installation before pre-deploy E2E and inside the rollback-covered browser step."
+    chaos: null
+    observable_signal: "The post-deploy browser step owns both browser installation and npm run test:production; any failure satisfies the rollback condition."
+    prevention: "Keep all post-deploy browser prerequisites inside the step whose failure triggers atomic rollback."

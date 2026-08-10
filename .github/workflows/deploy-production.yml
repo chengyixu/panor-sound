@@ -26,7 +26,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: ''
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check:syntax
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: bash scripts/repo-guards.sh
       - run: node scripts/verify-site.mjs --production
       - run: node scripts/test-panor-registry.mjs
       - name: Require a merged pull request
@@ -54,7 +60,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: ''
+          cache: npm
+      - run: npm ci --ignore-scripts
       - name: Configure production SSH
         env:
           DEPLOY_KEY: ${{ secrets.PANOR_DEPLOY_SSH_KEY }}
@@ -91,8 +98,13 @@ jobs:
         run: |
           curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape-after.sha"
           cmp "$RUNNER_TEMP/soundscape.sha" "$RUNNER_TEMP/soundscape-after.sha"
+      - name: Prove live backend rendering in production
+        id: browser
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:production
       - name: Roll back failed release
-        if: always() && steps.deploy.outcome == 'success' && (steps.smoke.outcome == 'failure' || steps.isolation.outcome == 'failure')
+        if: always() && steps.deploy.outcome == 'success' && (steps.smoke.outcome == 'failure' || steps.isolation.outcome == 'failure' || steps.browser.outcome == 'failure')
         env:
           HOST: ${{ vars.PANOR_DEPLOY_HOST }}
           PORT: ${{ vars.PANOR_DEPLOY_PORT }}
