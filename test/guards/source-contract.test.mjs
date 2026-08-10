@@ -5,8 +5,13 @@ import vm from 'node:vm'
 
 const config = fs.readFileSync(new URL('../../site.config.js', import.meta.url), 'utf8')
 const renderer = fs.readFileSync(new URL('../../assets/ui/live-page.js', import.meta.url), 'utf8')
+const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8')
+const main = fs.readFileSync(new URL('../../assets/main.js', import.meta.url), 'utf8')
+const bootstrap = fs.readFileSync(new URL('../../assets/application/bootstrap.js', import.meta.url), 'utf8')
+const api = fs.readFileSync(new URL('../../assets/infrastructure/soundscape-api.js', import.meta.url), 'utf8')
 const packageJson = JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8'))
 const deployWorkflow = fs.readFileSync(new URL('../../.github/workflows/deploy-production.yml', import.meta.url), 'utf8')
+const productionSmoke = fs.readFileSync(new URL('../../scripts/smoke-production.mjs', import.meta.url), 'utf8')
 const productionProof = fs.readFileSync(new URL('../e2e/production-live-page.e2e.test.mjs', import.meta.url), 'utf8')
 const sandbox = { window: {} }
 vm.runInNewContext(config, sandbox)
@@ -60,4 +65,24 @@ test('production map proof waits for a successful tile response', () => {
   assert.match(productionProof, /response\.status\(\) === 200\) resolveTileLoaded\(\)/)
   assert.match(productionProof, /Promise\.race\(\[\s*tileLoaded,/)
   assert.doesNotMatch(productionProof, /tileResponses\.some/)
+})
+
+test('mutable browser assets are versioned with the packaged release SHA', () => {
+  const token = '__PANOR_SOUND_RELEASE_SHA__'
+  const expectedReferences = [
+    [html, './assets/styles.css'],
+    [html, './site.config.js'],
+    [html, './assets/main.js'],
+    [main, './application/bootstrap.js'],
+    [bootstrap, '../domain/soundscape.js'],
+    [bootstrap, '../infrastructure/soundscape-api.js'],
+    [bootstrap, '../ui/live-page.js'],
+    [api, '../domain/soundscape.js'],
+  ]
+  for (const [source, reference] of expectedReferences) {
+    assert.ok(source.includes(`${reference}?v=${token}`), `missing release version on ${reference}`)
+  }
+  assert.match(deployWorkflow, /sed -i "s\/\$release_token\/\$GITHUB_SHA\/g"/)
+  assert.match(productionSmoke, /missing release-versioned asset/)
+  assert.match(productionSmoke, /missing release-versioned import/)
 })

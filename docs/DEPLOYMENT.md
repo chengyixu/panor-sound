@@ -66,7 +66,7 @@ The GitHub `production` environment contains:
 - Variable `PANOR_DEPLOY_PORT`
 - Variable `PANOR_DEPLOY_USER`
 
-After merge, `.github/workflows/deploy-production.yml` verifies merged-PR provenance, all local contracts, and registry update behavior; packages only approved files; deploys atomically; confirms all Panor registrations; verifies `/soundscape/` is unchanged; runs Playwright against the real APIs and rendered map/player; submits IndexNow; and rolls back automatically if any launch check fails.
+After merge, `.github/workflows/deploy-production.yml` verifies merged-PR provenance, all local contracts, and registry update behavior; replaces the browser asset release token with the merge SHA; packages only approved files; deploys atomically; confirms all Panor registrations; verifies `/soundscape/` is unchanged; runs Playwright against the real APIs and rendered map/player; submits IndexNow; and rolls back automatically if any launch check fails. The SHA-versioned URLs cover every mutable stylesheet, configuration script, entry module, and nested module import so Cloudflare cannot reuse a previous four-hour asset cache entry after a release.
 
 ## Manual Recovery Release
 

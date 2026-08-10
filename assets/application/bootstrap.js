@@ -1,12 +1,12 @@
-import { buildLiveModel } from '../domain/soundscape.js'
-import { SoundscapeApi } from '../infrastructure/soundscape-api.js'
+import { buildLiveModel } from '../domain/soundscape.js?v=__PANOR_SOUND_RELEASE_SHA__'
+import { SoundscapeApi } from '../infrastructure/soundscape-api.js?v=__PANOR_SOUND_RELEASE_SHA__'
 import {
   createPlayer,
   renderError,
   renderLiveSections,
   renderLoading,
   renderStaticChrome,
-} from '../ui/live-page.js'
+} from '../ui/live-page.js?v=__PANOR_SOUND_RELEASE_SHA__'
 
 const config = window.SOUND_SITE_CONFIG
 if (!config?.site || !config?.hero || !config?.footer || !config?.data) {

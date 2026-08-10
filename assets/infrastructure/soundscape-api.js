@@ -1,7 +1,7 @@
 import {
   parseRankingsResponse,
   parseSoundscapesResponse,
-} from '../domain/soundscape.js'
+} from '../domain/soundscape.js?v=__PANOR_SOUND_RELEASE_SHA__'
 
 async function fetchJson(url, timeoutMs) {
   const controller = new AbortController()

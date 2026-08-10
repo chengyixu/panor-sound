@@ -75,6 +75,24 @@ jobs:
         run: curl --fail --silent --show-error --location --compressed https://www.panor.tech/soundscape/ | sha256sum | cut -d' ' -f1 > "$RUNNER_TEMP/soundscape.sha"
       - name: Package release
         run: |
+          release_token='__PANOR_SOUND_RELEASE_SHA__'
+          release_files=(
+            index.html
+            assets/main.js
+            assets/application/bootstrap.js
+            assets/infrastructure/soundscape-api.js
+          )
+          for release_file in "${release_files[@]}"; do
+            grep -Fq "$release_token" "$release_file" || {
+              echo "Missing release token in $release_file" >&2
+              exit 1
+            }
+            sed -i "s/$release_token/$GITHUB_SHA/g" "$release_file"
+          done
+          if grep -RFn --exclude-dir=vendor "$release_token" index.html assets; then
+            echo 'Release token remained after packaging.' >&2
+            exit 1
+          fi
           cp deploy/server/panor-sound-release assets/.panor-sound-release
           COPYFILE_DISABLE=1 tar -czf "$RUNNER_TEMP/${GITHUB_SHA}.tgz" index.html site.config.js assets panor/product.json deploy/update-panor-registry.mjs
           rm assets/.panor-sound-release
