@@ -1,0 +1,40 @@
+{
+  "label": "Panor Sound (live static consumer · JavaScript)",
+  "lang": "js",
+  "git_root": ".",
+  "src_base": "",
+  "test_base": "test",
+  "import_prefix": "",
+  "resolve": "kt_pkg",
+  "catalog_project": "panor-sound",
+  "deploy_symlinks": false,
+  "sectors": [
+    {"id": "application", "root": "assets/application"},
+    {"id": "domain", "root": "assets/domain"},
+    {"id": "infrastructure", "root": "assets/infrastructure"},
+    {"id": "ui", "root": "assets/ui"},
+    {"id": "verification", "root": "test"}
+  ],
+  "behavior": [
+    ["soundscapesEndpoint|rankingsEndpoint", "live Soundscape API boundary is the single recording-data source"],
+    ["NON_PRODUCTION_TITLE", "explicit test/demo records never enter public presentation"],
+    ["throw new (TypeError|Error)", "backend drift and unavailable data fail visibly"],
+    ["textContent", "configured and backend copy is rendered without HTML injection"],
+    ["window\\.L\\.circleMarker", "map markers are created from live backend coordinates"]
+  ],
+  "boundaries_global": [
+    "/sound/ is a read-only static consumer; /soundscape/ owns data, publishing, and Panor Auth v6",
+    "recording rows, rankings, counts, creators, locations, and audio URLs are never copied into this repository"
+  ],
+  "boundaries_by_sector": {
+    "infrastructure": ["GET public feeds; POST anonymous listened_sec telemetry; no credentials or auth tokens"],
+    "ui": ["Leaflet is vendored; CARTO tiles are the only map-network dependency"],
+    "verification": ["fixture browser tests exercise application/infrastructure/UI at runtime; production browser proof uses real APIs"]
+  },
+  "edges": [
+    {"src": "application", "dst": "domain", "pattern": "customer-supplier"},
+    {"src": "application", "dst": "infrastructure", "pattern": "customer-supplier"},
+    {"src": "application", "dst": "ui", "pattern": "customer-supplier"},
+    {"src": "infrastructure", "dst": "domain", "pattern": "conformist"}
+  ]
+}

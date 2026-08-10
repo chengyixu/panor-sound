@@ -1,126 +1,64 @@
-# Sound
+# Soundscape Live Archive
 
-Neutral, static marketing-site scaffold for the independent production path **`/sound/`**.
+`/sound/` is Panor’s public, read-only discovery page for the live Soundscape archive. The site itself is statically deployed, but every recording-driven surface is built at runtime from the canonical Soundscape backend.
 
-It is intentionally not a copy of the existing `/soundscape/` product. This repository has no assumed backend, 3D experience, database, analytics vendor, CMS, or product claims. A developer can turn it into the approved page after the owner supplies the content brief.
+## Live Data Contract
 
-## What You Get
+- Latest published recordings: `/soundscape/api/soundscapes?scope=explore`
+- Current popularity: `/soundscape/api/rankings`
+- Anonymous listening telemetry: `POST /soundscape/api/soundscapes/{id}/play`
+- Real geographic markers: backend `lat` and `lng`
+- Audio and covers: backend-owned URLs
+- Archive totals and contributors: derived in-browser from the current public feed
 
-- A dependency-free responsive site shell.
-- A single, reviewable content configuration: `site.config.js`.
-- Root instructions for both Codex and Claude Code: `AGENTS.md` and `CLAUDE.md`.
-- Project-specific skills for development, verification, and safe deployment.
-- A generic Nginx configuration template and an opt-in static deployment script.
-- Gated GitHub CI/CD with environment-scoped, least-privilege deployment credentials.
+`site.config.js` contains presentation copy, limits, and endpoint addresses only. It contains no recording rows, copied counts, fake events, or map locations. Explicit backend test/demo records are removed by the domain quality rule before cards, rankings, markers, totals, or contributors are built.
 
-## Start Here
+## Route Boundary
 
-```bash
-git clone https://github.com/chengyixu/panor-sound.git
-cd panor-sound
+The repository deploys only `https://www.panor.tech/sound/`. The existing `https://www.panor.tech/soundscape/` application remains the owner of data, recording, publishing, and Panor unified auth v6. This repository does not change Google login, email/password login or registration, FedCM, or Chinese language detection.
 
-# Read the project contract before changing anything.
-cat AGENTS.md
-
-# Serve the static files locally.
-python3 -m http.server 4173
-
-# In another terminal, verify the scaffold.
-node scripts/verify-site.mjs
-```
-
-Open `http://localhost:4173/`. Local development works from `/`; the production reverse-proxy contract is `/sound/`.
-
-External contributors and the implementation developer should follow `CONTRIBUTING.md`. All product work goes through a pull request; approved site changes deploy automatically after merge.
-
-## Owner Decisions Needed Before Publication
-
-No developer or agent should infer these decisions. Record approved answers in `docs/CONTENT_BRIEF.md`, then update `site.config.js`:
-
-1. Product name, audience, value proposition, and approved claims.
-2. Primary and secondary CTA labels and destinations.
-3. Page sections, imagery, tone, locales, and legal/privacy links.
-4. Whether a contact form, analytics, tracking consent, or any integration is wanted.
-5. Production host access, static web-root parent, and release owner.
-
-`node scripts/verify-site.mjs --production` deliberately fails while the configuration remains in draft mode.
-
-## Project Layout
+## Architecture
 
 ```text
-AGENTS.md                    Shared Codex / Claude Code instructions
-CLAUDE.md                    Symlink to AGENTS.md
-index.html                   Semantic page shell
-site.config.js               All approved marketing content and links
-assets/                      Renderer and responsive styles
-docs/                        Content, developer handoff, security, deployment docs
-deploy/                      Nginx template and renderer
-scripts/                     Verification, deployment, skills installer
-skills/                      Portable project skills
-.github/workflows/verify.yml GitHub CI verification
-.github/workflows/deploy-production.yml Gated merge-to-production deployment
-CONTRIBUTING.md              Contributor and release workflow
+assets/application/      Runtime orchestration
+assets/domain/           Wire normalization and live model
+assets/infrastructure/   API and telemetry adapter
+assets/ui/               Accessible cards, map, and player
+assets/vendor/leaflet/   Vendored map dependency
+test/                    Contract, domain, guard, and browser tests
 ```
 
-## Working With an Agent
+See `HOW-IT-WORKS.md` for request flow and `CONTEXT.md` for environment and failure contracts.
 
-For Codex or Claude Code, paste the repository URL and begin with:
-
-> Read `AGENTS.md`, `docs/DEVELOPER_HANDOFF.md`, and `docs/CONTENT_BRIEF.md`. Do not infer product features or claims. Tell me which owner decisions are still required before implementing the marketing page.
-
-`CLAUDE.md` points to `AGENTS.md`, and Codex reads `AGENTS.md` in the repository tree. Install the optional task skills with:
+## Development
 
 ```bash
-./scripts/install-agent-skills.sh --target claude
-./scripts/install-agent-skills.sh --target codex
+npm ci --ignore-scripts
+npm run verify
 ```
 
-Use `--help` to specify another skill directory. The repository itself remains portable even if a local agent runtime uses a different skill root.
-
-## Configuration
-
-`site.config.js` is the source of truth for visible content. Keep it in `draft` mode until the owner approves all required copy and links.
-
-```js
-publish: { ready: false }
-```
-
-When approved, set `ready` to `true`, replace all placeholders, and run:
+To inspect locally while using the fixture-backed browser test:
 
 ```bash
+python3 -m http.server 4173
+# open http://127.0.0.1:4173/
+```
+
+Individual checks:
+
+```bash
+npm run check:syntax
+npm test
+npm run test:e2e
+bash scripts/repo-guards.sh
 node scripts/verify-site.mjs --production
+node scripts/test-panor-registry.mjs
 ```
+
+The post-deploy workflow additionally runs `npm run test:production`, which captures the actual production API responses and proves the rendered card order, marker count, tiles, totals, and player URL match them.
 
 ## Deployment
 
-The website is designed for an Nginx-hosted static directory at `/sound/`. Production credentials are stored only in the GitHub `production` environment.
+All product work goes through a pull request. GitHub Actions runs independent blocking lanes and an aggregate `ci-success` check. A merged release change deploys atomically to `/sound/`, verifies Panor registry surfaces, confirms `/soundscape/` is byte-for-byte unchanged during the release, and rolls back if static or browser smoke tests fail.
 
-```bash
-# Render a snippet for the owner-provisioned Nginx server.
-SITE_BASE_PATH=/sound SITE_WEB_PARENT=/absolute/web/root \
-  node deploy/render-nginx-config.mjs > sound.nginx.conf
-
-# Validate the planned release without touching a server.
-SOUND_SITE_BASE_PATH=/sound \
-SOUND_DEPLOY_TARGET=<ssh-target> \
-SOUND_WEB_PARENT=/absolute/web/root \
-  ./deploy/publish-static.sh --dry-run
-```
-
-Pull requests run structural checks. Any PR that changes `index.html`, `site.config.js`, or `assets/` must also pass the production-readiness policy, including approved content, full Panor SEO, Monetag-only monetization, and registration metadata. A reviewed merge into `main` is the production approval signal and automatically deploys the release. Direct pushes do not deploy because the workflow requires an associated merged PR. Follow `docs/DEPLOYMENT.md` for provisioning and rollback details. This repository never alters `/soundscape/`.
-
-## Validation
-
-```bash
-node scripts/verify-site.mjs
-```
-
-The check confirms the required static files, the `/sound/` production configuration, configuration-driven rendering, no legacy `/soundscape/` route, and a valid Nginx template. Release changes additionally run `node scripts/verify-site.mjs --production`, the Panor registry idempotency test, and post-deployment smoke checks.
-
-## Handoff
-
-- Developer workflow: `docs/DEVELOPER_HANDOFF.md`
-- Content decision template: `docs/CONTENT_BRIEF.md`
-- Production release / rollback: `docs/DEPLOYMENT.md`
-- Security handling: `docs/SECURITY.md`
-- Agent skills: `skills/README.md`
+Infrastructure and recovery details live in `docs/DEPLOYMENT.md`.

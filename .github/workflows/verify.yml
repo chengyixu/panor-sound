@@ -8,27 +8,57 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  syntax-and-unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: ''
-      - run: node scripts/verify-site.mjs
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check:syntax
+      - run: npm test
+
+  browser-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/repo-guards.sh
+
+  production-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node scripts/verify-site.mjs --production
       - run: node scripts/test-panor-registry.mjs
-      - name: Verify production readiness for release changes
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          if [[ ! "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || [[ "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
-            BASE_SHA="$(git merge-base origin/main "$GITHUB_SHA")"
-          fi
-          if git diff --name-only "$BASE_SHA" "$GITHUB_SHA" | grep -Eq '^(index\.html|site\.config\.js|assets/)'; then
-            node scripts/verify-site.mjs --production
-          else
-            echo 'No deployable site files changed; production readiness gate skipped.'
-          fi
+
+  ci-success:
+    name: ci-success
+    needs: [syntax-and-unit, browser-contract, guards, production-policy]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'All blocking verification lanes passed.'
+
+  verify:
+    needs: ci-success
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Compatibility check for the existing protected branch rule.'

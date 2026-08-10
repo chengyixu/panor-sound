@@ -6,8 +6,18 @@ const root = path.resolve(import.meta.dirname, '..')
 const requiredFiles = [
   'index.html',
   'site.config.js',
+  'package.json',
+  'package-lock.json',
   'assets/main.js',
+  'assets/application/bootstrap.js',
+  'assets/domain/soundscape.js',
+  'assets/infrastructure/soundscape-api.js',
+  'assets/ui/live-page.js',
   'assets/styles.css',
+  'assets/vendor/leaflet/leaflet.js',
+  'assets/vendor/leaflet/leaflet.css',
+  'assets/vendor/leaflet/LICENSE',
+  'scripts/repo-guards.sh',
   'deploy/nginx-site.conf.template',
   'deploy/render-nginx-config.mjs',
   'deploy/publish-static.sh',
@@ -15,6 +25,11 @@ const requiredFiles = [
   'panor/product.json',
   'AGENTS.md',
   'README.md',
+  'CONTEXT.md',
+  'HOW-IT-WORKS.md',
+  'docs/adr/0001-live-backend-contract.md',
+  'bug-regression-catalog/catalog.yaml',
+  '.sectormap.json',
 ]
 const failures = []
 const pass = message => console.log(`PASS ${message}`)
@@ -33,42 +48,50 @@ function requirePattern(content, pattern, message) {
 }
 
 for (const relativePath of requiredFiles) {
-  const target = path.join(root, relativePath)
-  if (fs.existsSync(target)) pass(`required file: ${relativePath}`)
+  if (fs.existsSync(path.join(root, relativePath))) pass(`required file: ${relativePath}`)
   else fail(`missing required file: ${relativePath}`)
 }
 
-const configPath = path.join(root, 'site.config.js')
-const config = fs.readFileSync(configPath, 'utf8')
-if (/basePath:\s*['"]\/sound\/['"]/.test(config)) pass('production base path is /sound/')
-else fail('site.config.js must set site.basePath to /sound/')
-
-if (/publish:\s*\{\s*ready:\s*(true|false)/s.test(config)) pass('publish readiness is explicit')
-else fail('site.config.js must declare publish.ready')
-
-const filesToInspect = ['index.html', 'site.config.js', 'assets/main.js', 'assets/styles.css', 'deploy/nginx-site.conf.template']
-for (const relativePath of filesToInspect) {
-  const content = fs.readFileSync(path.join(root, relativePath), 'utf8')
-  // Allow https://.../soundscape/ URLs (linking to the live app)
-  const urlSafe = content.replace(/https?:\/\/\S*\/soundscape\//g, '')
-  if (urlSafe.includes('/soundscape/')) fail(`${relativePath} still references legacy /soundscape/`)
-}
-
-const renderer = read('assets/main.js')
-if (renderer.includes('textContent')) pass('renderer uses textContent for configured copy')
-else fail('renderer must use textContent for configured copy')
-
+const html = read('index.html')
+const config = read('site.config.js')
+const main = read('assets/main.js')
+const bootstrap = read('assets/application/bootstrap.js')
+const domain = read('assets/domain/soundscape.js')
+const api = read('assets/infrastructure/soundscape-api.js')
+const ui = read('assets/ui/live-page.js')
 const nginxTemplate = read('deploy/nginx-site.conf.template')
-if (nginxTemplate.includes('{{SITE_BASE_PATH}}') && nginxTemplate.includes('{{SITE_WEB_PARENT}}')) pass('Nginx template uses deployment placeholders')
-else fail('Nginx template is missing deployment placeholders')
+
+requirePattern(config, /basePath:\s*['"]\/sound\/['"]/, 'production base path is /sound/')
+requirePattern(config, /publish:\s*\{\s*ready:\s*(true|false)/s, 'publish readiness is explicit')
+requirePattern(config, /soundscapesEndpoint:\s*['"]\/soundscape\/api\/soundscapes\?scope=explore['"]/, 'live soundscapes endpoint is canonical')
+requirePattern(config, /rankingsEndpoint:\s*['"]\/soundscape\/api\/rankings['"]/, 'live rankings endpoint is canonical')
+requirePattern(config, /href:\s*['"]https:\/\/www\.panor\.tech\/soundscape\/['"]/, 'CTA hands off to the existing Soundscape app')
+requirePattern(main, /import ['"]\.\/application\/bootstrap\.js['"]/, 'entry point delegates to the application layer')
+requirePattern(bootstrap, /Promise|api\.load\(\)/, 'application layer loads live data')
+requirePattern(api, /method:\s*['"]POST['"][\s\S]*listened_sec/, 'anonymous play telemetry uses the backend contract')
+requirePattern(ui, /textContent/, 'renderer uses textContent for configured and backend copy')
+requirePattern(ui, /L\.circleMarker|window\.L\.circleMarker/, 'renderer creates real map markers')
+requirePattern(domain, /NON_PRODUCTION_TITLE/, 'domain rejects explicit test and demo records')
+
+if (/\b(?:audio_url|play_count|save_count|created_at|author_name)\s*:/.test(config)) fail('site.config.js contains copied backend recording fields')
+else pass('site.config.js contains no copied backend recording rows')
+
+const configIndex = html.indexOf('./site.config.js')
+const leafletIndex = html.indexOf('./assets/vendor/leaflet/leaflet.js')
+const moduleIndex = html.indexOf('./assets/main.js')
+if (configIndex >= 0 && leafletIndex > configIndex && moduleIndex > leafletIndex) pass('runtime scripts load in config → map → application order')
+else fail('runtime scripts must load in config → map → application order')
+requirePattern(html, /\.\/assets\/vendor\/leaflet\/leaflet\.css/, 'vendored map stylesheet is loaded')
+
+if (nginxTemplate.includes('{{SITE_BASE_PATH}}') && nginxTemplate.includes('{{SITE_WEB_PARENT}}')) pass('Nginx template uses deployment variables')
+else fail('Nginx template is missing deployment variables')
 
 if (process.argv.includes('--production')) {
-  const html = read('index.html')
   const manifest = JSON.parse(read('panor/product.json'))
   if (/ready:\s*true/.test(config)) pass('publish readiness enabled')
   else fail('production verification requires publish.ready: true')
-  if (/Replace with|placeholder|Draft marketing site|_Required_/i.test(`${config}\n${JSON.stringify(manifest)}`)) fail('production configuration still has placeholders')
-  else pass('production configuration has no scaffold placeholders')
+  if (/Replace with|Draft marketing site|_Required_/i.test(`${config}\n${JSON.stringify(manifest)}`)) fail('production configuration still has scaffold copy')
+  else pass('production configuration has no scaffold copy')
 
   if (manifest.slug === 'sound' && manifest.path === '/sound/' && manifest.url === 'https://www.panor.tech/sound/') pass('Panor manifest uses the canonical /sound/ route')
   else fail('Panor manifest must use the canonical /sound/ route')

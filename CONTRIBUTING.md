@@ -12,7 +12,7 @@ Read these files in order:
 4. `docs/DEPLOYMENT.md` — CI/CD, rollback, and production behavior.
 5. `docs/SECURITY.md` — secrets and integration boundaries.
 
-Do not invent product claims, CTA destinations, legal text, integrations, analytics, forms, or product capabilities. Unresolved decisions stay as draft placeholders and must not be marked production-ready.
+Do not invent product claims, CTA destinations, legal text, integrations, analytics, forms, or product capabilities. Never replace unavailable backend data with copied recordings or sample rows.
 
 ## Local Setup
 
@@ -56,7 +56,7 @@ If the PR changes `index.html`, `site.config.js`, or `assets/`, it is a producti
 node scripts/verify-site.mjs --production
 ```
 
-The production check requires approved non-placeholder content, `publish.ready: true`, canonical and social metadata, structured data, a 150–300 word noscript fallback, Monetag, cross-promotion, no AdSense, and the fixed `/sound/` route contract.
+The production check requires `publish.ready: true`, the live API/module contract, canonical and social metadata, structured data, a 150–300 word noscript fallback, Monetag, cross-promotion, no AdSense, and the fixed `/sound/` route contract.
 
 Manually test:
 

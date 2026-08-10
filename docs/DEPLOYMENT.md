@@ -2,7 +2,7 @@
 
 ## Scope
 
-This is a static-site release procedure for `/sound/`. It does not deploy an application server, database, background worker, analytics service, or 3D renderer. It must not modify the existing `/soundscape/` site.
+This is a static-site release procedure for the live `/sound/` consumer. It does not deploy the Soundscape API, database, auth system, background worker, or 3D renderer. It must not modify the existing `/soundscape/` site.
 
 No server host, SSH alias, web-root path, or credential is committed to this repository. The infrastructure owner supplies them at release time.
 
@@ -12,7 +12,7 @@ No server host, SSH alias, web-root path, or credential is committed to this rep
 - Direct pushes to `main` fail the deployment provenance gate.
 - Documentation, workflow, and deployment-tool changes do not publish the site by themselves.
 - Changes to `index.html`, `site.config.js`, or `assets/` trigger the production deployment workflow.
-- The workflow fails closed until `publish.ready: true`, approved content, required SEO, Monetag, cross-promotion, and `panor/product.json` all pass verification.
+- The workflow fails closed until unit, contract, browser, repository-guard, production-policy, registry, and live post-deploy checks pass.
 
 ## Preconditions
 
@@ -66,7 +66,7 @@ The GitHub `production` environment contains:
 - Variable `PANOR_DEPLOY_PORT`
 - Variable `PANOR_DEPLOY_USER`
 
-After merge, `.github/workflows/deploy-production.yml` verifies merged-PR provenance, production policy, and registry update behavior; packages only approved files; deploys atomically; confirms all Panor registrations; verifies `/soundscape/` is unchanged; submits IndexNow; and rolls back automatically if launch smoke checks fail.
+After merge, `.github/workflows/deploy-production.yml` verifies merged-PR provenance, all local contracts, and registry update behavior; packages only approved files; deploys atomically; confirms all Panor registrations; verifies `/soundscape/` is unchanged; runs Playwright against the real APIs and rendered map/player; submits IndexNow; and rolls back automatically if any launch check fails.
 
 ## Manual Recovery Release
 
@@ -98,7 +98,8 @@ The manual publisher uploads only `index.html`, `site.config.js`, and `assets/`,
 2. Confirm direct navigation to an asset succeeds.
 3. Confirm browser back/refresh behavior is correct.
 4. Test mobile and desktop layouts, keyboard navigation, and every approved CTA.
-5. Confirm `https://www.panor.tech/soundscape/` remains unchanged.
+5. Confirm both live APIs were requested and current backend titles, marker count, totals, and audio URLs rendered.
+6. Confirm `https://www.panor.tech/soundscape/` remains unchanged.
 
 ## Rollback
 
