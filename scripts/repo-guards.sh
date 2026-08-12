@@ -114,7 +114,9 @@ required_files=(
   assets/infrastructure/soundscape-api.js assets/ui/live-page.js
   test/contract/live-api-contract.test.mjs test/domain/live-model.test.mjs
   test/e2e/live-page.e2e.test.mjs test/e2e/production-live-page.e2e.test.mjs
+  test/e2e/turntable-player.e2e.test.mjs
   CONTEXT.md HOW-IT-WORKS.md docs/adr/0001-live-backend-contract.md
+  docs/adr/0002-two-deck-turntable-player.md
   bug-regression-catalog/catalog.yaml .sectormap.json
   assets/application/CLAUDE.md assets/domain/CLAUDE.md
   assets/infrastructure/CLAUDE.md assets/ui/CLAUDE.md test/CLAUDE.md

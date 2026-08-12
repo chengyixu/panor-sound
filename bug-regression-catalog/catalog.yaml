@@ -48,3 +48,21 @@ entries:
     chaos: null
     observable_signal: "Packaging replaces the token with the merge SHA, and production smoke verifies the exact SHA on direct assets and nested module imports."
     prevention: "Keep HTML uncached and make every mutable asset URL unique per deployment; never rely on cache-request headers to invalidate an existing shared-cache HIT."
+  - id: compact-vinyl-requires-double-activation
+    user_visible_symptom: Tapping the compact vinyl once does nothing, especially on touch devices, because the player waits for a double-click or double-tap.
+    lint: "The source contract forbids dblclick handlers and requires the compact vinyl to be a real button controlling the focused dialog."
+    chaos: null
+    observable_signal: "The turntable Playwright contract opens focused mode with one click and one mobile touchscreen tap."
+    prevention: "Keep one semantic compact vinyl button as the only expansion gesture; never reintroduce double activation or a duplicate Expand control."
+  - id: browse-state-never-ducks-audio
+    user_visible_symptom: The tonearm enters Browse visually but the current recording remains at full volume, making previews feel abrupt and masking the selected transition.
+    lint: null
+    chaos: "The browser test holds a compact vertical tonearm drag beyond one detent and samples the active deck after the 150ms ramp."
+    observable_signal: "Active-deck volume reaches approximately 0.25 before pointer release and returns to the normal transition path afterward."
+    prevention: "Drive browse volume through the generation-cancelled 16ms ramp helper and pin the 150ms duck in Playwright."
+  - id: crossfade-corrupts-active-deck
+    user_visible_symptom: Metadata names one recording while another deck remains active, or both backend media sources continue playing after a rapid selection.
+    lint: null
+    chaos: "The browser contract inspects both decks during the crossfade and then requires exactly one populated active deck after completion."
+    observable_signal: "Two live URLs overlap only during the transition; afterward one active deck matches the selected title and the outgoing deck has no source."
+    prevention: "Promote the incoming deck when playback starts, generation-cancel stale transitions, and clear the outgoing deck only after handoff."

@@ -67,7 +67,11 @@ try {
   await page.locator('.sound-card').first().click()
   await page.waitForSelector('#live-player:not([hidden])')
   assert.equal(await page.locator('#live-player-title').innerText(), model.featured[0].title)
-  assert.equal(new URL(await page.locator('#live-player-audio').getAttribute('src'), siteUrl).pathname, model.featured[0].audioUrl)
+  assert.equal(await page.locator('#live-player-source').textContent(), 'Latest queue')
+  assert.equal(new URL(await page.locator('.audio-player-deck[data-active="true"]').getAttribute('src'), siteUrl).pathname, model.featured[0].audioUrl)
+  await page.locator('#live-player-expand').click()
+  await page.waitForSelector('#turntable-dialog[open]')
+  assert.equal(await page.locator('#focused-player-title').innerText(), model.featured[0].title)
 
   console.log('PASS production live-data browser proof')
 } finally {

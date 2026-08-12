@@ -13,6 +13,7 @@ const packageJson = JSON.parse(fs.readFileSync(new URL('../../package.json', imp
 const deployWorkflow = fs.readFileSync(new URL('../../.github/workflows/deploy-production.yml', import.meta.url), 'utf8')
 const productionSmoke = fs.readFileSync(new URL('../../scripts/smoke-production.mjs', import.meta.url), 'utf8')
 const productionProof = fs.readFileSync(new URL('../e2e/production-live-page.e2e.test.mjs', import.meta.url), 'utf8')
+const turntableProof = fs.readFileSync(new URL('../e2e/turntable-player.e2e.test.mjs', import.meta.url), 'utf8')
 const sandbox = { window: {} }
 vm.runInNewContext(config, sandbox)
 
@@ -42,6 +43,20 @@ test('production configuration contains endpoints, not copied soundscape rows', 
 
 test('renderer has no fake map or future-event placeholders', () => {
   assert.doesNotMatch(renderer, /map-placeholder|Coming Soon|TBA|const locations =|const coverPool =/)
+})
+
+test('compact vinyl uses one accessible activation path', () => {
+  assert.match(html, /id="live-player-expand"[\s\S]*type="button"[\s\S]*aria-controls="turntable-dialog"/)
+  assert.doesNotMatch(`${html}\n${renderer}`, /dblclick|double-?tap|double-?click/i)
+  assert.match(turntableProof, /newPage\(\{ viewport: \{ width: 390, height: 844 \}, isMobile: true, hasTouch: true \}\)/)
+  assert.match(turntableProof, /touchscreen\.tap/)
+})
+
+test('turntable contract pins two-deck handoff and browse ducking', () => {
+  assert.match(packageJson.scripts['test:e2e'], /turntable-player\.e2e\.test\.mjs/)
+  assert.match(html, /id="live-player-audio-standby"/)
+  assert.match(turntableProof, /overlappingDecks/)
+  assert.match(turntableProof, /duckedVolume >= 0\.2 && duckedVolume <= 0\.3/)
 })
 
 test('production proof is isolated from pre-merge tests', () => {
