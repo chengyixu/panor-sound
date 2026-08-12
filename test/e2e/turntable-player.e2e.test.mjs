@@ -120,7 +120,29 @@ try {
   assert.equal(await page.locator('body').evaluate(element => getComputedStyle(element).overflow), 'hidden')
   assert.equal(await page.evaluate(() => document.activeElement?.id), 'focused-player-collapse')
   assert.equal(await page.locator('#focused-player-title').innerText(), 'Harbour Rain')
+  assert.equal(await page.locator('#focused-player-creator').innerText(), 'Ada')
   assert.equal(await page.locator('#focused-player-source').textContent(), 'Latest queue')
+  const focusedGeometry = await page.evaluate(() => {
+    const rectangle = selector => document.querySelector(selector).getBoundingClientRect()
+    const overlapArea = (first, second) => {
+      const width = Math.max(0, Math.min(first.right, second.right) - Math.max(first.left, second.left))
+      const height = Math.max(0, Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top))
+      return Math.round(width * height)
+    }
+    const record = rectangle('.vinyl-record-focused')
+    const tonearm = rectangle('#focused-player-tonearm')
+    const copy = rectangle('.focused-player-copy')
+    return {
+      noHorizontalOverflow: document.documentElement.scrollWidth === document.documentElement.clientWidth,
+      recordCopyOverlap: overlapArea(record, copy),
+      tonearmCopyOverlap: overlapArea(tonearm, copy),
+      connectedTonearm: Boolean(document.querySelector('#focused-player-tonearm .tonearm-pivot > .tonearm-moving .tonearm-arm > .tonearm-head > .tonearm-needle')),
+    }
+  })
+  assert.equal(focusedGeometry.noHorizontalOverflow, true)
+  assert.equal(focusedGeometry.recordCopyOverlap, 0)
+  assert.equal(focusedGeometry.tonearmCopyOverlap, 0)
+  assert.equal(focusedGeometry.connectedTonearm, true)
   await page.keyboard.press('Shift+Tab')
   assert.equal(await page.evaluate(() => document.activeElement?.closest('#turntable-dialog')?.id), 'turntable-dialog')
 
@@ -137,6 +159,7 @@ try {
   assert.equal(await player.getAttribute('data-parked'), 'true')
   assert.equal(await activeAudio.getAttribute('data-play-state'), 'paused')
   assert.equal(await activeAudio.evaluate(audio => audio.currentTime), 18)
+  assert.equal(await page.locator('.compact-vinyl-button .vinyl-record').evaluate(element => getComputedStyle(element).animationPlayState), 'paused')
   await page.locator('#live-player-tonearm').click()
   assert.equal(await player.getAttribute('data-parked'), 'false')
   assert.equal(await activeAudio.getAttribute('data-play-state'), 'playing')
@@ -153,6 +176,36 @@ try {
   assert.equal(await page.locator('.turntable-candidate').count(), 5)
   const chooserTitles = await page.locator('.turntable-candidate .candidate-copy strong').allInnerTexts()
   assert.ok(chooserTitles.every(candidateTitle => ['Harbour Rain', 'Market Closing Bell', 'Station Platform Hum'].includes(candidateTitle)))
+  const chooserGeometry = await page.evaluate(() => {
+    const record = document.querySelector('.vinyl-record-focused').getBoundingClientRect()
+    const tonearm = document.querySelector('#focused-player-tonearm').getBoundingClientRect()
+    const candidates = [...document.querySelectorAll('.turntable-candidate')].map(element => ({
+      offset: Number(element.dataset.rowOffset),
+      rectangle: element.getBoundingClientRect(),
+      transform: getComputedStyle(element).transform,
+    }))
+    const overlaps = (first, second) => (
+      Math.min(first.right, second.right) > Math.max(first.left, second.left)
+      && Math.min(first.bottom, second.bottom) > Math.max(first.top, second.top)
+    )
+    return {
+      onRecord: candidates.every(candidate => candidate.rectangle.left >= record.left && candidate.rectangle.left <= record.right),
+      clearOfTonearm: candidates.every(candidate => !overlaps(candidate.rectangle, tonearm)),
+      curved: candidates[0].rectangle.left < candidates[1].rectangle.left
+        && candidates[1].rectangle.left < candidates[2].rectangle.left
+        && candidates[2].rectangle.left > candidates[3].rectangle.left
+        && candidates[3].rectangle.left > candidates[4].rectangle.left,
+      rotated: candidates.filter(candidate => candidate.offset !== 0).every(candidate => candidate.transform !== 'none'),
+      record: record.toJSON(),
+      tonearm: tonearm.toJSON(),
+      candidates: candidates.map(candidate => ({ offset: candidate.offset, rectangle: candidate.rectangle.toJSON() })),
+    }
+  })
+  const chooserGeometryMessage = JSON.stringify(chooserGeometry)
+  assert.equal(chooserGeometry.onRecord, true, chooserGeometryMessage)
+  assert.equal(chooserGeometry.clearOfTonearm, true, chooserGeometryMessage)
+  assert.equal(chooserGeometry.curved, true, chooserGeometryMessage)
+  assert.equal(chooserGeometry.rotated, true, chooserGeometryMessage)
 
   await activeAudio.evaluate(audio => {
     Object.defineProperty(audio, 'currentTime', { configurable: true, writable: true, value: 9 })
@@ -179,7 +232,7 @@ try {
   const tonearmBox = await compactTonearm.boundingBox()
   await page.mouse.move(tonearmBox.x + tonearmBox.width / 2, tonearmBox.y + tonearmBox.height / 2)
   await page.mouse.down()
-  await page.mouse.move(tonearmBox.x + tonearmBox.width / 2, tonearmBox.y + tonearmBox.height / 2 - 68, { steps: 8 })
+  await page.mouse.move(tonearmBox.x + tonearmBox.width / 2, tonearmBox.y + tonearmBox.height / 2 - 48, { steps: 8 })
   await page.waitForFunction(() => document.querySelector('#live-player').dataset.browsing === 'true')
   assert.equal(await page.locator('#live-player-compact-preview').innerText(), 'Station Platform Hum')
   assert.equal(await dialog.isVisible(), false)
@@ -276,6 +329,17 @@ try {
   await mobilePage.waitForSelector('.sound-card')
   await mobilePage.locator('.sound-card').first().tap()
   await mobilePage.locator('#live-player:not([hidden])').waitFor()
+  const compactMobileGeometry = await mobilePage.evaluate(() => {
+    const playerRectangle = document.querySelector('#live-player').getBoundingClientRect()
+    return {
+      noHorizontalOverflow: document.documentElement.scrollWidth === document.documentElement.clientWidth,
+      inViewport: playerRectangle.left >= 0
+        && playerRectangle.right <= innerWidth
+        && playerRectangle.bottom <= innerHeight,
+    }
+  })
+  assert.equal(compactMobileGeometry.noHorizontalOverflow, true)
+  assert.equal(compactMobileGeometry.inViewport, true)
   const mobileExpandBox = await mobilePage.locator('#live-player-expand').boundingBox()
   await mobilePage.touchscreen.tap(
     mobileExpandBox.x + mobileExpandBox.width / 2,
@@ -283,7 +347,45 @@ try {
   )
   await mobilePage.locator('#turntable-dialog[open]').waitFor()
   assert.equal(await mobilePage.locator('#focused-player-title').innerText(), 'Harbour Rain')
+  assert.equal(await mobilePage.locator('#focused-player-creator').innerText(), 'Ada')
   assert.equal(await mobilePage.locator('#focused-player-choose').isVisible(), true)
+  const mobileFocusedGeometry = await mobilePage.evaluate(() => {
+    const rectangle = selector => document.querySelector(selector).getBoundingClientRect()
+    const overlapArea = (first, second) => {
+      const width = Math.max(0, Math.min(first.right, second.right) - Math.max(first.left, second.left))
+      const height = Math.max(0, Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top))
+      return Math.round(width * height)
+    }
+    const tonearm = rectangle('#focused-player-tonearm')
+    const copy = rectangle('.focused-player-copy')
+    const record = rectangle('.vinyl-record-focused')
+    return {
+      noHorizontalOverflow: document.documentElement.scrollWidth === document.documentElement.clientWidth,
+      tonearmCopyOverlap: overlapArea(tonearm, copy),
+      recordCopyOverlap: overlapArea(record, copy),
+    }
+  })
+  assert.equal(mobileFocusedGeometry.noHorizontalOverflow, true)
+  assert.equal(mobileFocusedGeometry.tonearmCopyOverlap, 0)
+  assert.equal(mobileFocusedGeometry.recordCopyOverlap, 0)
+  await mobilePage.locator('#focused-player-choose').tap()
+  const mobileChooserGeometry = await mobilePage.evaluate(() => {
+    const record = document.querySelector('.vinyl-record-focused').getBoundingClientRect()
+    const tonearm = document.querySelector('#focused-player-tonearm').getBoundingClientRect()
+    const candidates = [...document.querySelectorAll('.turntable-candidate')].map(element => element.getBoundingClientRect())
+    const overlaps = (first, second) => (
+      Math.min(first.right, second.right) > Math.max(first.left, second.left)
+      && Math.min(first.bottom, second.bottom) > Math.max(first.top, second.top)
+    )
+    return {
+      inViewport: candidates.every(candidate => candidate.left >= 0 && candidate.right <= innerWidth && candidate.top >= 0 && candidate.bottom <= innerHeight),
+      onRecord: candidates.every(candidate => candidate.left >= record.left && candidate.left <= record.right),
+      clearOfTonearm: candidates.every(candidate => !overlaps(candidate, tonearm)),
+    }
+  })
+  assert.equal(mobileChooserGeometry.inViewport, true)
+  assert.equal(mobileChooserGeometry.onRecord, true)
+  assert.equal(mobileChooserGeometry.clearOfTonearm, true)
   await mobilePage.close()
 
   console.log('PASS turntable player browser contract')

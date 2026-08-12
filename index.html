@@ -114,22 +114,28 @@
           aria-label="Open focused turntable"
         >
           <span class="vinyl-record" aria-hidden="true">
-            <span class="vinyl-label"><span></span></span>
+            <span class="vinyl-label"></span>
           </span>
         </button>
         <button class="tonearm-control tonearm-control-compact" id="live-player-tonearm" type="button">
-          <span class="tonearm-pivot" aria-hidden="true"></span>
-          <span class="tonearm-arm" aria-hidden="true"><span class="tonearm-head"></span></span>
+          <span class="tonearm-pivot" aria-hidden="true">
+            <span class="tonearm-moving">
+              <span class="tonearm-arm">
+                <span class="tonearm-head"><span class="tonearm-needle"></span></span>
+              </span>
+            </span>
+          </span>
         </button>
       </div>
       <div class="live-player-copy">
         <span class="live-player-source" id="live-player-source"></span>
         <strong id="live-player-title"></strong>
+        <span id="live-player-creator"></span>
         <span id="live-player-location"></span>
         <span class="live-player-preview" id="live-player-compact-preview" aria-live="polite"></span>
       </div>
       <div class="live-player-actions">
-        <button class="live-player-choose" id="live-player-choose" type="button">Choose recording</button>
+        <button class="live-player-choose" id="live-player-choose" type="button">Queue</button>
         <button class="live-player-close" id="live-player-close" type="button" aria-label="Stop audio and close player">×</button>
       </div>
       <audio class="audio-player-deck" id="live-player-audio" preload="auto"></audio>
@@ -143,22 +149,29 @@
           <span class="focused-player-source" id="focused-player-source"></span>
           <a class="focused-player-app-link" id="live-player-app-link">Open in Soundscape</a>
         </header>
-        <div class="focused-turntable-stage">
-          <div class="vinyl-record vinyl-record-focused" aria-hidden="true">
-            <span class="vinyl-label"><span></span></span>
+        <div class="focused-turntable-body">
+          <div class="focused-turntable-stage">
+            <div class="vinyl-record vinyl-record-focused" aria-hidden="true">
+              <span class="vinyl-label"></span>
+            </div>
+            <div class="turntable-candidates" id="turntable-candidates" aria-label="Recording choices" hidden></div>
+            <button class="tonearm-control tonearm-control-focused" id="focused-player-tonearm" type="button">
+              <span class="tonearm-pivot" aria-hidden="true">
+                <span class="tonearm-moving">
+                  <span class="tonearm-arm">
+                    <span class="tonearm-head"><span class="tonearm-needle"></span></span>
+                  </span>
+                </span>
+              </span>
+            </button>
           </div>
-          <div class="turntable-candidates" id="turntable-candidates" aria-label="Recording choices" hidden></div>
-          <button class="tonearm-control tonearm-control-focused" id="focused-player-tonearm" type="button">
-            <span class="tonearm-pivot" aria-hidden="true"></span>
-            <span class="tonearm-arm" aria-hidden="true"><span class="tonearm-head"></span></span>
-          </button>
-        </div>
-        <div class="focused-player-copy">
-          <span class="focused-player-state" id="focused-player-state"></span>
-          <h2 id="focused-player-title"></h2>
-          <p id="focused-player-location"></p>
-          <p id="focused-player-description"></p>
-          <button class="focused-player-choose" id="focused-player-choose" type="button">Choose recording</button>
+          <div class="focused-player-copy">
+            <span class="focused-player-state"><span class="player-state-dot" aria-hidden="true"></span><span id="focused-player-state"></span></span>
+            <h2 id="focused-player-title"></h2>
+            <p class="focused-player-byline"><span id="focused-player-creator"></span><span aria-hidden="true"> · </span><span id="focused-player-location"></span></p>
+            <p id="focused-player-description"></p>
+            <button class="focused-player-choose" id="focused-player-choose" type="button">Browse records</button>
+          </div>
         </div>
         <p class="sr-only" id="live-player-announcer" aria-live="polite"></p>
       </div>

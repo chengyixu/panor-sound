@@ -11,10 +11,10 @@
 | Primary CTA | “Open Soundscape” → `https://www.panor.tech/soundscape/` | Wilson | 2026-08-10 |
 | Required sections | Hero, latest public recordings, popular now, live map, archive totals, community recordists | Wilson | 2026-08-10 |
 | Removed claims | Curated Editor’s Picks, Hall of Fame, libraries, team rankings, events, workshops, coming-soon dates | Wilson | 2026-08-10 |
-| Visual direction | Minimal black and white, high contrast, immersive listening, accessible controls | Yvonne + Wilson | 2026-07-28 |
+| Visual direction | Quiet physical materiality: warm-black vinyl, restrained brushed metal, no neon/glow, immersive high-contrast listening, accessible controls | Yvonne + Wilson | 2026-08-12 |
 | Active-player presentation | Persistent compact turntable at bottom-right; a single click or tap on its vinyl expands it into a larger centered focused turntable without interrupting playback | Wilson | 2026-08-12 |
 | Recording browse interaction | Intentional vertical tonearm dragging browses live recording candidates in both compact and focused turntables; ordinary page scrolling outside the tonearm remains unaffected | Wilson | 2026-08-12 |
-| Browse selection contract | Focused mode shows five ready candidates; compact mode shows only the centered candidate title. Audio ducks to about 25% over 150ms and release commits the centered candidate | Wilson + native reference contract | 2026-08-12 |
+| Browse selection contract | Focused mode bends five ready candidates along a concave record groove without crossing the tonearm; compact mode shows only the centered candidate title. Audio ducks to about 25% over 150ms and release commits the centered candidate | Wilson + native reference contract | 2026-08-12 |
 | Recording transition | Committing a different candidate uses an approximately 700ms equal-power two-deck crossfade between live backend audio URLs; no media is copied into the website | Wilson + native reference contract | 2026-08-12 |
 | Listening queue scope | Tonearm browsing stays within the live section where playback started—Latest or Popular—rather than merging sections into a global queue | Wilson | 2026-08-12 |
 | Natural playback end | The active live recording loops continuously; reaching its media end never auto-advances the section queue | Native reference contract | 2026-08-12 |
