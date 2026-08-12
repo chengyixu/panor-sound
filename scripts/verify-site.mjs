@@ -27,6 +27,7 @@ const requiredFiles = [
   'README.md',
   'CONTEXT.md',
   'HOW-IT-WORKS.md',
+  'DESIGN.md',
   'docs/adr/0001-live-backend-contract.md',
   'docs/adr/0002-two-deck-turntable-player.md',
   'bug-regression-catalog/catalog.yaml',

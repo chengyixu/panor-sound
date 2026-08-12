@@ -14,6 +14,7 @@ const deployWorkflow = fs.readFileSync(new URL('../../.github/workflows/deploy-p
 const productionSmoke = fs.readFileSync(new URL('../../scripts/smoke-production.mjs', import.meta.url), 'utf8')
 const productionProof = fs.readFileSync(new URL('../e2e/production-live-page.e2e.test.mjs', import.meta.url), 'utf8')
 const turntableProof = fs.readFileSync(new URL('../e2e/turntable-player.e2e.test.mjs', import.meta.url), 'utf8')
+const design = fs.readFileSync(new URL('../../DESIGN.md', import.meta.url), 'utf8')
 const sandbox = { window: {} }
 vm.runInNewContext(config, sandbox)
 
@@ -57,6 +58,15 @@ test('turntable contract pins two-deck handoff and browse ducking', () => {
   assert.match(html, /id="live-player-audio-standby"/)
   assert.match(turntableProof, /overlappingDecks/)
   assert.match(turntableProof, /duckedVolume >= 0\.2 && duckedVolume <= 0\.3/)
+})
+
+test('turntable design and geometry contracts are durable', () => {
+  assert.match(design, /pivot → moving arm → cartridge head → needle/)
+  assert.match(design, /queue follows a concave path on the playable groove/)
+  assert.match(turntableProof, /tonearmCopyOverlap/)
+  assert.match(turntableProof, /recordCopyOverlap/)
+  assert.match(turntableProof, /clearOfTonearm/)
+  assert.match(turntableProof, /animationPlayState/)
 })
 
 test('production proof is isolated from pre-merge tests', () => {

@@ -231,10 +231,12 @@ export function createPlayer(api, appUrl) {
     trackedGeneration: -1,
   }))
   const title = byId('live-player-title')
+  const creator = byId('live-player-creator')
   const location = byId('live-player-location')
   const source = byId('live-player-source')
   const compactPreview = byId('live-player-compact-preview')
   const focusedTitle = byId('focused-player-title')
+  const focusedCreator = byId('focused-player-creator')
   const focusedLocation = byId('focused-player-location')
   const focusedDescription = byId('focused-player-description')
   const focusedSource = byId('focused-player-source')
@@ -340,8 +342,8 @@ export function createPlayer(api, appUrl) {
   function setTonearmVisual(progress, offset = 0) {
     const clamped = Math.max(0, Math.min(1, progress))
     for (const surface of [player, dialog]) {
-      surface.style.setProperty('--tonearm-angle', `${-18 + clamped * 30}deg`)
-      surface.style.setProperty('--tonearm-lift', `${offset * -3}px`)
+      surface.style.setProperty('--tonearm-angle', `${18 - clamped * 23}deg`)
+      surface.style.setProperty('--tonearm-lift', `${offset * -4}px`)
     }
   }
 
@@ -379,9 +381,11 @@ export function createPlayer(api, appUrl) {
   function updateMetadata(sound) {
     if (!sound) return
     title.textContent = sound.title
+    creator.textContent = sound.creator
     location.textContent = sound.location
     source.textContent = `${activeQueueLabel} queue`
     focusedTitle.textContent = sound.title
+    focusedCreator.textContent = sound.creator
     focusedLocation.textContent = sound.location
     focusedDescription.textContent = sound.description
     focusedSource.textContent = `${activeQueueLabel} queue`
@@ -390,6 +394,7 @@ export function createPlayer(api, appUrl) {
 
   function renderCandidates() {
     candidates.replaceChildren()
+    dialog.dataset.chooserOpen = String(chooserOpen)
     if (!activeSound || activeQueue.length < 2 || (!browsing && !chooserOpen)) {
       candidates.hidden = true
       return
@@ -783,6 +788,7 @@ export function createPlayer(api, appUrl) {
       setPlayerState()
     }
     candidates.hidden = true
+    dialog.dataset.chooserOpen = 'false'
     document.body.classList.remove('turntable-modal-open')
     if (!player.hidden) expand.focus()
   })

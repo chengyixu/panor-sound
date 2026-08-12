@@ -72,3 +72,27 @@ entries:
     chaos: "The browser contract asserts body overflow immediately after Escape closes the modal rather than waiting for the dialog close event."
     observable_signal: "The focused dialog is closed, the compact player remains visible, and body overflow is no longer hidden in the same interaction turn."
     prevention: "Release the turntable-modal-open body class synchronously before calling dialog.close(); retain close-event cleanup only as an idempotent fallback."
+  - id: independent-turntable-offsets-overlap-metadata
+    user_visible_symptom: The focused tonearm or oversized record cuts through the recording title, description, or controls at common desktop and phone sizes.
+    lint: null
+    chaos: "The browser contract measures record, tonearm, and metadata rectangles at 1280×900 and 390×844."
+    observable_signal: "Record-to-copy and tonearm-to-copy overlap areas remain exactly zero, with no horizontal document overflow."
+    prevention: "Keep the focused player in one responsive stage-plus-metadata grid; never restore independent viewport offsets for its physical parts."
+  - id: tonearm-cartridge-renders-detached
+    user_visible_symptom: The cartridge head appears separated from the tonearm shaft while rotating, making the player look mechanically broken.
+    lint: "The focused and compact markup must nest pivot → moving arm → arm → head → needle."
+    chaos: null
+    observable_signal: "The turntable browser contract proves the complete nested hierarchy exists before interaction."
+    prevention: "Apply motion to the shared tonearm-moving ancestor instead of positioning the cartridge as a separate sibling."
+  - id: curved-queue-crosses-tonearm
+    user_visible_symptom: Recording labels or their invisible tap targets overlap the tonearm, especially on a 390×844 phone viewport.
+    lint: null
+    chaos: "The browser contract opens the five-item chooser at desktop and mobile sizes and measures every candidate rectangle."
+    observable_signal: "Every candidate stays on the record, follows a concave left-offset pattern, remains inside the viewport, and has zero intersection with the tonearm hit area."
+    prevention: "Reserve a fixed arm lane and bound the candidate width at each responsive breakpoint; do not use a full-width list beside the record."
+  - id: parked-vinyl-keeps-spinning
+    user_visible_symptom: Audio is paused with the needle parked, but the compact or focused vinyl still spins and communicates the wrong playback state.
+    lint: null
+    chaos: "The browser contract parks the tonearm after playback begins and reads the vinyl animation state."
+    observable_signal: "The active audio deck is paused and the vinyl animation-play-state is paused at the same time."
+    prevention: "Derive platter motion from the shared data-parked player state rather than from player visibility."
