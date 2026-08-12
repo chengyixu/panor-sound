@@ -620,7 +620,9 @@ export function createPlayer(api, appUrl) {
   }
 
   function collapseFocused() {
-    if (dialog.open) dialog.close()
+    if (!dialog.open) return
+    document.body.classList.remove('turntable-modal-open')
+    dialog.close()
   }
 
   function toggleParked() {
