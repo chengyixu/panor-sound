@@ -33,9 +33,28 @@ npm run test:production
 ## Resource Ownership
 
 - Local test server: TCP `127.0.0.1:4173`, owned and terminated by `test/e2e/live-page.mjs`.
-- Audio playback: one browser `<audio>` element owned by `assets/ui/live-page.js`.
+- Audio playback: a controlled two-deck browser audio engine owned by `assets/ui/live-page.js`. One deck is active and one is standby; both may overlap only during a selected-recording crossfade.
 - Map instance: one Leaflet instance created after its container is attached to the document.
 - Deployment: GitHub Actions atomically replaces only `/sound/`; `/soundscape/` is fingerprinted before and after release.
+
+## Listening Presentation
+
+- **Compact turntable:** the persistent bottom-right listening surface shown while a recording is active. It remains visible while the page scrolls.
+- **Focused turntable:** the larger centered listening surface opened from the compact turntable. Opening or closing it must not interrupt playback.
+- A single click or tap on the compact vinyl opens the focused turntable. The vinyl itself is the accessible Expand button, so no double-click, double-tap, or separate duplicate Expand control exists.
+- Closing the focused turntable collapses back to the compact turntable and preserves playback. Explicitly closing the compact turntable stops playback, finalizes its anonymous play telemetry, clears the active recording, and hides the player.
+- While the focused turntable is open, the page behind it is inert and scroll-locked. Keyboard focus remains inside the focused player until Collapse or `Escape` returns to the compact turntable without stopping playback.
+- The focused turntable is a near-full-viewport immersive listening surface rather than a contained dialog card. Its oversized platter may extend beyond a viewport edge, following the native turntable composition while preserving responsive tonearm and candidate geometry.
+- The platter uses the native-reference monochrome vinyl treatment—dark record, restrained light grooves, and a simple center label. Backend cover images remain recording metadata and are not painted onto the record.
+- The platter rotates continuously while a turntable is active, including while the tonearm is parked. Rotation does not represent playback progress. Reduced-motion preference disables continuous rotation without changing playback semantics.
+- The tonearm is the foreground play/pause control. Moving it off the record pauses at the current position; returning it to the record resumes that same recording.
+- Intentional vertical tonearm dragging browses selectable recordings in both compact and focused turntables. Compact browsing must stay confined to the tonearm hit target, begin only after the native-reference movement threshold, and must not capture ordinary page scrolling outside that target.
+- In the focused turntable, browsing previews five ready candidates centered on the active selection. In the compact turntable, the same detent model previews only the centered candidate title inside the compact player, with no external candidate flyout.
+- Current audio ducks to approximately 25% over 150 milliseconds while the user crosses candidate detents; releasing commits the centered candidate. Cancelling restores full volume over 150 milliseconds. Merely crossing a detent does not change the recording, and an unready candidate is never presented as selectable.
+- Committing a different candidate performs an approximately 700-millisecond equal-power crossfade: the ducked outgoing live backend recording fades down while the selected live backend recording fades up on the standby deck, which then becomes active. No audio is copied, bundled, or synthesized by the website.
+- The **listening queue** is the playable, deduplicated set of live recordings rendered in the section where playback began. Starting from Latest browses Latest; starting from Popular browses Popular. The player does not silently merge sections into a global queue.
+- An active recording loops continuously at its natural end. Loop completion never auto-advances the section queue; changing recordings requires an intentional browse selection or selecting another recording card.
+- Recording identity, metadata, artwork, audio, and selectable candidates continue to come only from the current live backend model.
 
 ## Failure Contract
 

@@ -23,7 +23,7 @@ The repository deploys only `https://www.panor.tech/sound/`. The existing `https
 assets/application/      Runtime orchestration
 assets/domain/           Wire normalization and live model
 assets/infrastructure/   API and telemetry adapter
-assets/ui/               Accessible cards, map, and player
+assets/ui/               Accessible cards, map, and two-deck turntable player
 assets/vendor/leaflet/   Vendored map dependency
 test/                    Contract, domain, guard, and browser tests
 ```
@@ -55,7 +55,7 @@ node scripts/verify-site.mjs --production
 node scripts/test-panor-registry.mjs
 ```
 
-The post-deploy workflow additionally runs `npm run test:production`, which captures the actual production API responses and proves the rendered card order, marker count, tiles, totals, and player URL match them.
+The post-deploy workflow additionally runs `npm run test:production`, which captures the actual production API responses and proves the rendered card order, marker count, tiles, totals, active turntable deck URL, and focused-player metadata match them.
 
 ## Deployment
 

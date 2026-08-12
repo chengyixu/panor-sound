@@ -5,7 +5,7 @@
   "scripts": {
     "check:syntax": "find assets scripts test deploy -type f \\( -name '*.js' -o -name '*.mjs' \\) -not -path 'assets/vendor/*' -print0 | xargs -0 -n1 node --check",
     "test": "node --test test/contract/*.test.mjs test/domain/*.test.mjs test/guards/*.test.mjs",
-    "test:e2e": "node test/e2e/live-page.e2e.test.mjs",
+    "test:e2e": "node test/e2e/live-page.e2e.test.mjs && node test/e2e/turntable-player.e2e.test.mjs",
     "test:production": "node test/e2e/production-live-page.e2e.test.mjs",
     "verify": "npm run check:syntax && npm test && npm run test:e2e && bash scripts/repo-guards.sh && node scripts/verify-site.mjs --production && node scripts/test-panor-registry.mjs"
   },
