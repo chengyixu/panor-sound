@@ -62,3 +62,8 @@ The post-deploy workflow additionally runs `npm run test:production`, which capt
 All product work goes through a pull request. GitHub Actions runs independent blocking lanes and an aggregate `ci-success` check. A merged release change deploys atomically to `/sound/`, verifies Panor registry surfaces, confirms `/soundscape/` is byte-for-byte unchanged during the release, and rolls back if static or browser smoke tests fail.
 
 Infrastructure and recovery details live in `docs/DEPLOYMENT.md`.
+
+
+<!-- minervacap-pre-hiklik-promotion -->
+> **Discover Klik:** https://pre.hiklik.ai/
+<!-- /minervacap-pre-hiklik-promotion -->
