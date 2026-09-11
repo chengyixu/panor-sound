@@ -1222,6 +1222,69 @@ main,
   }
 }
 
+@media (max-width: 52rem) and (orientation: landscape) and (max-height: 36rem) {
+  .focused-turntable-header {
+    min-height: 4rem;
+    padding: max(0.7rem, env(safe-area-inset-top)) clamp(0.9rem, 2.5vw, 1.5rem) 0.55rem;
+  }
+
+  .focused-turntable-body {
+    inset: 4rem clamp(0.9rem, 2.5vw, 1.5rem) max(0.75rem, env(safe-area-inset-bottom));
+    grid-template-columns: minmax(0, 1.28fr) minmax(14.5rem, 0.72fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+  }
+
+  .vinyl-record-focused {
+    top: 50%;
+    left: clamp(-4rem, -9vw, -2rem);
+    width: min(80vh, 54vw);
+    height: min(80vh, 54vw);
+  }
+
+  .tonearm-control-focused {
+    top: 2%;
+    right: 1%;
+    width: clamp(6rem, 12vw, 7.5rem);
+    height: 92%;
+    --pivot-size: clamp(2.7rem, 5vw, 3.5rem);
+    --arm-length: min(56vh, 20rem);
+    --head-width: clamp(2rem, 3vw, 2.55rem);
+    --head-height: 0.9rem;
+  }
+
+  .focused-player-copy {
+    align-content: center;
+    padding: 0 0.2rem 0 0;
+  }
+
+  .focused-player-copy h2 {
+    max-width: 13ch;
+    font-size: clamp(2rem, 4.6vw, 3.25rem);
+    line-height: 0.96;
+  }
+
+  .focused-player-state {
+    margin-bottom: 0.55rem;
+  }
+
+  .focused-player-copy p {
+    margin-top: 0.65rem;
+  }
+
+  .focused-player-copy #focused-player-description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .focused-player-choose {
+    min-height: 2.4rem;
+    margin-top: 0.9rem;
+  }
+}
+
 @media (max-width: 38rem) {
   .site-header {
     align-items: flex-start;

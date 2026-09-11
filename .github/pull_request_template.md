@@ -17,7 +17,6 @@
 - [ ] `site.config.js` remains the visible-copy source of truth
 - [ ] `panor/product.json` matches the approved name and descriptions
 - [ ] Full SEO, JSON-LD, canonical, OG, Twitter, and noscript content are present
-- [ ] Monetag zone `264769` and `/public/cross-promo.js` are present
 - [ ] No AdSense marker or credential is included
 - [ ] `/soundscape/` is not modified or referenced by active site assets
 - [ ] Rollback impact and any new integration/data flow are described

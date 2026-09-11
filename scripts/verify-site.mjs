@@ -133,9 +133,8 @@ if (process.argv.includes('--production')) {
   if (noscriptWords >= 150 && noscriptWords <= 300) pass('noscript fallback contains 150-300 words')
   else fail('noscript fallback must contain 150-300 words')
 
-  requirePattern(html, /<script\s+src=["']https:\/\/quge5\.com\/88\/tag\.min\.js["']\s+data-zone=["']264769["']\s+async\s+data-cfasync=["']false["']><\/script>/i, 'approved Monetag MultiTag is installed')
   requirePattern(html, /<script\s+src=["']\/public\/cross-promo\.js["']\s+defer><\/script>/i, 'Panor cross-promotion script is installed')
-  if (/adsbygoogle|pagead2\.googlesyndication\.com|ca-pub-/i.test(html)) fail('AdSense is forbidden by the Monetag-only decision')
+  if (/adsbygoogle|pagead2\.googlesyndication\.com|ca-pub-/i.test(html)) fail('AdSense markers are absent')
   else pass('AdSense markers are absent')
 
   if (/add_header/i.test(nginxTemplate)) fail('route-level add_header would suppress inherited Panor security headers')

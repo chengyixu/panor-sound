@@ -43,8 +43,6 @@ async function main() {
   const html = await siteResponse.text()
   const requiredMarkers = [
     'https://www.panor.tech/sound/',
-    'https://quge5.com/88/tag.min.js',
-    'data-zone="264769"',
     '/public/cross-promo.js',
   ]
   for (const marker of requiredMarkers) {

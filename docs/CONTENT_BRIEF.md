@@ -48,7 +48,7 @@
 
 ### Existing Site Scripts
 
-Monetag zone `264769` and `/public/cross-promo.js` remain owner-approved existing integrations. No AdSense, new analytics provider, auth SDK, form provider, or cookie framework is added by this change.
+`/public/cross-promo.js` remains the owner-approved existing integration. No AdSense, new analytics provider, auth SDK, form provider, or cookie framework is added by this change.
 
 ## Non-Negotiable Copy Rules
 

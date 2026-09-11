@@ -20,7 +20,7 @@ Use environment variables at release time or the selected platform’s secret st
 
 ## Integrations
 
-The production policy permits the owner-approved Monetag MultiTag, Panor cross-promotion script, public Soundscape API calls, anonymous play-duration event, vendored Leaflet runtime, and CARTO map tiles. AdSense markers are rejected.
+The production policy permits the Panor cross-promotion script, public Soundscape API calls, anonymous play-duration events, the vendored Leaflet runtime, and CARTO map tiles. AdSense markers are rejected.
 
 The `/sound/` consumer sends no account credential or auth token. Public feed requests are same-origin GETs. Play telemetry sends only a recording ID and rounded listened seconds. CARTO receives ordinary tile-request metadata but no Soundscape identity. Exact purpose, privacy posture, failure behavior, and rollback are recorded in `docs/CONTENT_BRIEF.md`.
 
