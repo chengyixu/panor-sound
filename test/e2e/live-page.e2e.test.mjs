@@ -43,7 +43,7 @@ try {
 
   await page.route('**/*', async route => {
     const url = new URL(route.request().url())
-    if (url.hostname === 'quge5.com' || url.pathname === '/public/cross-promo.js') {
+    if (url.pathname === '/public/cross-promo.js') {
       await route.fulfill({ status: 200, contentType: 'application/javascript', body: '' })
       return
     }
@@ -112,7 +112,7 @@ try {
   const failurePage = await browser.newPage()
   await failurePage.route('**/*', async route => {
     const url = new URL(route.request().url())
-    if (url.hostname === 'quge5.com' || url.pathname === '/public/cross-promo.js') {
+    if (url.pathname === '/public/cross-promo.js') {
       await route.fulfill({ status: 200, contentType: 'application/javascript', body: '' })
       return
     }

@@ -117,8 +117,6 @@ deploy_release() {
   fi
   grep -Fq 'https://www.panor.tech/sound/' "$bundle/index.html" || die "release is missing the canonical URL"
   grep -Fq 'index, follow, max-image-preview:large, max-snippet:-1' "$bundle/index.html" || die "release robots policy is invalid"
-  grep -Fq 'https://quge5.com/88/tag.min.js' "$bundle/index.html" || die "release is missing approved Monetag"
-  grep -Fq 'data-zone="264769"' "$bundle/index.html" || die "release uses the wrong Monetag zone"
   grep -Fq '/public/cross-promo.js' "$bundle/index.html" || die "release is missing Panor cross-promotion"
   if grep -Eqi 'adsbygoogle|pagead2\.googlesyndication\.com|ca-pub-' "$bundle/index.html"; then
     die "release contains a forbidden AdSense marker"

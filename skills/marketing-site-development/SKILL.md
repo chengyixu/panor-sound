@@ -19,7 +19,7 @@ Use for content, layout, navigation, responsive styling, accessibility, and appr
 - Treat `site.config.js` as the source of presentation copy, links, limits, and API endpoint addresses.
 - Keep all recording rows backend-owned; never add static featured, ranking, map, contributor, or statistics data.
 - Use `textContent`, not HTML injection, for configured copy.
-- Preserve the documented public feed, rankings, anonymous play, Leaflet, CARTO, Monetag, and cross-promotion contracts.
+- Preserve the documented public feed, rankings, anonymous play, Leaflet, CARTO, and cross-promotion contracts.
 - Preserve the independent `/sound/` deployment; API calls and the app CTA may target `/soundscape/`, but deployment and auth code may not.
 - Provide keyboard-accessible interactions and responsive layouts.
 

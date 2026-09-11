@@ -78,6 +78,12 @@ entries:
     chaos: "The browser contract measures record, tonearm, and metadata rectangles at 1280×900 and 390×844."
     observable_signal: "Record-to-copy and tonearm-to-copy overlap areas remain exactly zero, with no horizontal document overflow."
     prevention: "Keep the focused player in one responsive stage-plus-metadata grid; never restore independent viewport offsets for its physical parts."
+  - id: short-landscape-turntable-collapses-stage
+    user_visible_symptom: On a short landscape screen, the turntable stage collapses into the metadata region, leaving a visually empty black slab below the title.
+    lint: null
+    chaos: "The fixture browser test opens the focused player at 782×472, matching a compact landscape viewport."
+    observable_signal: "The focused player retains two grid columns, vertically centered metadata, and zero record or tonearm overlap with the metadata region."
+    prevention: "Keep the short-landscape breakpoint as a two-column stage-and-copy grid; do not reuse the stacked mobile layout when height is constrained."
   - id: tonearm-cartridge-renders-detached
     user_visible_symptom: The cartridge head appears separated from the tonearm shaft while rotating, making the player look mechanically broken.
     lint: "The focused and compact markup must nest pivot → moving arm → arm → head → needle."

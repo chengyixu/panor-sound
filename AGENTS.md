@@ -54,7 +54,6 @@ Approved runtime integrations are documented in `docs/CONTENT_BRIEF.md` and `doc
 - Public Soundscape feed and ranking GETs.
 - Anonymous play-duration POST.
 - Vendored Leaflet with CARTO map tiles.
-- Existing Monetag and Panor cross-promotion scripts.
 
 Any new integration requires purpose, data flow, privacy posture, failure behavior, tests, and rollback documentation in the same pull request.
 

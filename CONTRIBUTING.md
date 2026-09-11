@@ -28,18 +28,11 @@ Open `http://localhost:4173/`. The local site runs at `/`; production runs at `/
 ## Source-of-Truth Files
 
 - `site.config.js` — visible copy, links, navigation, sections, and `publish.ready`.
-- `index.html` — SEO metadata, structured data, Monetag, cross-promotion, and semantic shell.
 - `assets/` — presentation and safe DOM rendering.
 - `panor/product.json` — homepage, cross-promo, sitemap, `llms.txt`, and FAQ registration metadata.
 - `docs/CONTENT_BRIEF.md` — dated owner decisions and approval record.
 
-The approved Monetag integration is:
-
-```html
-<script src="https://quge5.com/88/tag.min.js" data-zone="264769" async data-cfasync="false"></script>
-```
-
-AdSense is not allowed. Keep `<script src="/public/cross-promo.js" defer></script>` in the production page.
+AdSense is not allowed. Keep `<script src="/public/cross-promo.js" defer></script>` in the production page as the approved cross-promotion integration.
 
 ## Required Checks
 
@@ -55,8 +48,6 @@ If the PR changes `index.html`, `site.config.js`, or `assets/`, it is a producti
 ```bash
 node scripts/verify-site.mjs --production
 ```
-
-The production check requires `publish.ready: true`, the live API/module contract, canonical and social metadata, structured data, a 150–300 word noscript fallback, Monetag, cross-promotion, no AdSense, and the fixed `/sound/` route contract.
 
 Manually test:
 
